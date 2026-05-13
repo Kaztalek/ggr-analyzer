@@ -1,0 +1,15 @@
+{
+	"name": "ggr-analyzer",
+	"module": "index.ts",
+	"type": "module",
+	"scripts": {
+		"pretty": "prettier --write ."
+	},
+	"devDependencies": {
+		"bun-types": "latest",
+		"prettier": "^3.8.3"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}
