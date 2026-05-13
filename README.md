@@ -17,7 +17,7 @@ Run across the replays from the paths specified in `.env`:
 bun .
 ```
 
-On an individual file:
+Print stats on an individual replay file:
 ```bash
 bun . path/to/replay.ggr
 ```
