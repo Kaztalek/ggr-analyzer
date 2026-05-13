@@ -1,6 +1,25 @@
 import {CHARACTERS, OUTCOMES, RANKS} from './constants';
-import {readFile} from 'fs/promises';
+import {readFile, readdir} from 'fs/promises';
 import path from 'path';
+
+export const readAllReplays = async (replayPaths: string[]) => {
+	const replayPromises = replayPaths.map((filepath) => readReplayDir(filepath));
+	const replayList = await Promise.all(replayPromises);
+	return replayList.flat();
+};
+
+export const readReplayDir = async (filepath: string) => {
+	try {
+		const files = await readdir(filepath);
+		const replayPromises = files
+			.filter((file) => file.endsWith('.ggr'))
+			.map((file) => readReplayData(path.resolve(filepath, file)));
+		const replays = await Promise.all(replayPromises);
+		return replays;
+	} catch (err) {
+		console.error(err);
+	}
+};
 
 export const readReplayData = async (filename: string) => {
 	const buffer = await readFile(filename);

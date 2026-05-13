@@ -1,4 +1,4 @@
-import {readReplayData} from './replayUtils';
+import {readAllReplays, readReplayData} from './replayUtils';
 
 const main = async () => {
 	const filename = process.argv[2];
@@ -12,11 +12,12 @@ const main = async () => {
 		return;
 	}
 	// read replay data from directories specified in .env
-	const paths = process.env.REPLAY_PATHS?.split(',');
-	if (!Array.isArray(paths)) {
+	const replayPaths = process.env.REPLAY_PATHS?.split(',');
+	if (!Array.isArray(replayPaths)) {
 		throw new Error('REPLAY_PATHS not specified. update .env');
 	}
-	console.log(paths);
+	const replays = await readAllReplays(replayPaths);
+	console.log(`${replays.length} replays found`);
 };
 
 main();
