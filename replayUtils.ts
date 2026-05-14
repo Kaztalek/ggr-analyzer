@@ -1,4 +1,4 @@
-import {CHARACTERS, OUTCOMES, RANKS} from './constants';
+import {CHARACTERS, MATCH_ERRORS, RANKS} from './constants';
 import {readFile, readdir} from 'fs/promises';
 import path from 'path';
 
@@ -61,7 +61,17 @@ export const parseReplay = (ggrBuffer: Buffer) => {
 	const p1RoundsWon = ggrBuffer.readUInt8(0x7b);
 	const p2RoundsWon = ggrBuffer.readUInt8(0x7c);
 
-	const outcome = OUTCOMES[ggrBuffer.readUInt8(0x7d)];
+	const outcome = ggrBuffer.readUInt8(0x7d);
+	const errors = [];
+	if (outcome & 1) {
+		errors.push(MATCH_ERRORS.UNFINISHED);
+	}
+	if (outcome & 2) {
+		errors.push(MATCH_ERRORS.DISCONNECTED);
+	}
+	if (outcome & 4) {
+		errors.push(MATCH_ERRORS.DESYNCED);
+	}
 
 	const ping = ggrBuffer.readUInt8(0x7e);
 
@@ -92,7 +102,7 @@ export const parseReplay = (ggrBuffer: Buffer) => {
 		gmtOffset,
 		p1RoundsWon,
 		p2RoundsWon,
-		outcome,
+		errors,
 		ping,
 		durationInFrames,
 		p1Score,

@@ -26,12 +26,11 @@ export const CHARACTERS = [
 	{id: 25, name: 'Justice', code: 'JU'}
 ];
 
-export const OUTCOMES: {[key: number]: string} = {
-	0: 'OK',
-	1: 'unfinished',
-	2: 'disconnected',
-	4: 'desynced'
-};
+export enum MATCH_ERRORS {
+	UNFINISHED = 'unfinished',
+	DISCONNECTED = 'disconnected',
+	DESYNCED = 'desynced'
+}
 
 export const RANKS = [
 	'0: Civilian',
