@@ -56,7 +56,7 @@ export const parseReplay = (ggrBuffer: Buffer) => {
 	const mode = ggrBuffer.readUInt8(0x75) === 1 ? 'single' : 'team';
 	const version = ggrBuffer.readUInt8(0x76) === 0 ? '+R' : 'AC';
 
-	const gmtOffset = `GMT-${Math.floor(ggrBuffer.readInt32LE(0x77) / 60 / 60)}`;
+	const gmtOffset = `GMT${new Intl.NumberFormat('en-US', {signDisplay: 'exceptZero'}).format(-Math.floor(ggrBuffer.readInt32LE(0x77) / 60 / 60))}`;
 
 	const p1RoundsWon = ggrBuffer.readUInt8(0x7b);
 	const p2RoundsWon = ggrBuffer.readUInt8(0x7c);

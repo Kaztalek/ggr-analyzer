@@ -1,36 +1,36 @@
 export const CHARACTERS = [
-	{id: 0, name: 'Sol', code: 'SO'},
-	{id: 1, name: 'Ky', code: 'KY'},
-	{id: 2, name: 'May', code: 'MA'},
-	{id: 3, name: 'Millia', code: 'MI'},
-	{id: 4, name: 'Axl', code: 'AX'},
-	{id: 5, name: 'Potemkin', code: 'PO'},
-	{id: 6, name: 'Chipp', code: 'CH'},
-	{id: 7, name: 'Eddie', code: 'ED'},
-	{id: 8, name: 'Baiken', code: 'BA'},
-	{id: 9, name: 'Faust', code: 'FA'},
-	{id: 10, name: 'Testament', code: 'TE'},
-	{id: 11, name: 'Jam', code: 'JA'},
-	{id: 12, name: 'Anji', code: 'AN'},
-	{id: 13, name: 'Johnny', code: 'JO'},
-	{id: 14, name: 'Venom', code: 'VE'},
-	{id: 15, name: 'Dizzy', code: 'DI'},
-	{id: 16, name: 'Slayer', code: 'SL'},
-	{id: 17, name: 'I-No', code: 'IN'},
-	{id: 18, name: 'Zappa', code: 'ZA'},
-	{id: 19, name: 'Bridget', code: 'BR'},
-	{id: 20, name: 'Robo-Ky', code: 'RO'},
-	{id: 21, name: 'A.B.A', code: 'AB'},
-	{id: 22, name: 'Order-Sol', code: 'OR'},
-	{id: 23, name: 'Kliff', code: 'KL'},
-	{id: 24, name: 'Justice', code: 'JU'}
+	{id: 1, name: 'Sol', code: 'SO'},
+	{id: 2, name: 'Ky', code: 'KY'},
+	{id: 3, name: 'May', code: 'MA'},
+	{id: 4, name: 'Millia', code: 'MI'},
+	{id: 5, name: 'Axl', code: 'AX'},
+	{id: 6, name: 'Potemkin', code: 'PO'},
+	{id: 7, name: 'Chipp', code: 'CH'},
+	{id: 8, name: 'Eddie', code: 'ED'},
+	{id: 9, name: 'Baiken', code: 'BA'},
+	{id: 10, name: 'Faust', code: 'FA'},
+	{id: 11, name: 'Testament', code: 'TE'},
+	{id: 12, name: 'Jam', code: 'JA'},
+	{id: 13, name: 'Anji', code: 'AN'},
+	{id: 14, name: 'Johnny', code: 'JO'},
+	{id: 15, name: 'Venom', code: 'VE'},
+	{id: 16, name: 'Dizzy', code: 'DI'},
+	{id: 17, name: 'Slayer', code: 'SL'},
+	{id: 18, name: 'I-No', code: 'IN'},
+	{id: 19, name: 'Zappa', code: 'ZA'},
+	{id: 20, name: 'Bridget', code: 'BR'},
+	{id: 21, name: 'Robo-Ky', code: 'RO'},
+	{id: 22, name: 'A.B.A', code: 'AB'},
+	{id: 23, name: 'Order-Sol', code: 'OR'},
+	{id: 24, name: 'Kliff', code: 'KL'},
+	{id: 25, name: 'Justice', code: 'JU'}
 ];
 
 export const OUTCOMES: {[key: number]: string} = {
 	0: 'OK',
 	1: 'unfinished',
-	2: 'disconnect',
-	4: 'desync'
+	2: 'disconnected',
+	4: 'desynced'
 };
 
 export const RANKS = [
