@@ -1,33 +1,61 @@
-import {CHARACTERS, MATCH_ERRORS, RANKS} from './constants';
+import {CHARACTERS, MATCH_ERRORS, RANKS, type characterType} from './constants';
 import {readFile, readdir} from 'fs/promises';
 import path from 'path';
 
-export const readAllReplays = async (replayPaths: string[]) => {
+export type gameModeType = 'single' | 'team';
+export type gameVersionType = '+R' | 'AC';
+export type ggrReplayType = {
+	date: Date;
+	p1SteamId: string;
+	p2SteamId: string;
+	p1Name: string;
+	p2Name: string;
+	p1Char: characterType;
+	p2Char: characterType;
+	modifiedOptions: boolean;
+	mode: gameModeType;
+	version: gameVersionType;
+	gmtOffset: string;
+	p1RoundsWon: number;
+	p2RoundsWon: number;
+	errors: MATCH_ERRORS[];
+	ping: number;
+	durationInFrames: number;
+	p1Score: number;
+	p2Score: number;
+	p1Rank: string;
+	p2Rank: string;
+	winner: string;
+};
+
+export const readAllReplays = async (
+	replayPaths: string[]
+): Promise<ggrReplayType[]> => {
 	const replayPromises = replayPaths.map((filepath) => readReplayDir(filepath));
 	const replayList = await Promise.all(replayPromises);
 	return replayList.flat();
 };
 
-export const readReplayDir = async (filepath: string) => {
-	try {
-		const files = await readdir(filepath);
-		const replayPromises = files
-			.filter((file) => file.endsWith('.ggr'))
-			.map((file) => readReplayData(path.resolve(filepath, file)));
-		const replays = await Promise.all(replayPromises);
-		return replays;
-	} catch (err) {
-		console.error(err);
-	}
+export const readReplayDir = async (
+	filepath: string
+): Promise<ggrReplayType[]> => {
+	const files = await readdir(filepath);
+	const replayPromises = files
+		.filter((file) => file.endsWith('.ggr'))
+		.map((file) => readReplayData(path.resolve(filepath, file)));
+	const replays = await Promise.all(replayPromises);
+	return replays;
 };
 
-export const readReplayData = async (filename: string) => {
+export const readReplayData = async (
+	filename: string
+): Promise<ggrReplayType> => {
 	const buffer = await readFile(filename);
 	return parseReplay(buffer);
 };
 
 // replay metadata documentation: https://steamcommunity.com/app/348550/discussions/0/3203746177244378016/
-export const parseReplay = (ggrBuffer: Buffer) => {
+export const parseReplay = (ggrBuffer: Buffer): ggrReplayType => {
 	const year = ggrBuffer.readUInt16LE(0x1a);
 	const month = ggrBuffer.readUInt8(0x1c);
 	const day = ggrBuffer.readUInt8(0x1d);

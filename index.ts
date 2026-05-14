@@ -1,3 +1,4 @@
+import {generateCharacterDistribution} from './reports';
 import {readAllReplays, readReplayData} from './replayUtils';
 
 const main = async () => {
@@ -18,6 +19,7 @@ const main = async () => {
 	}
 	const replays = await readAllReplays(replayPaths);
 	console.log(`${replays.length} replays found`);
+	generateCharacterDistribution(replays);
 };
 
 main();

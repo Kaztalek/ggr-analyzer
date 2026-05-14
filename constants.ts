@@ -1,4 +1,10 @@
-export const CHARACTERS = [
+export type characterType = {
+	id: number;
+	name: string;
+	code: string;
+};
+
+export const CHARACTERS: characterType[] = [
 	{id: 1, name: 'Sol', code: 'SO'},
 	{id: 2, name: 'Ky', code: 'KY'},
 	{id: 3, name: 'May', code: 'MA'},
