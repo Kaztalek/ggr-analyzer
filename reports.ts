@@ -28,6 +28,8 @@ export const generateCharacterDistribution = async (
 		charData[char.code] = {total: 0, unique: new Set(), wins: 0, yours: 0};
 	});
 
+	let totalProcessedReplays = 0;
+
 	replays.forEach((replay) => {
 		// skip replays that aren't normal 1v1 matches
 		if (
@@ -54,6 +56,8 @@ export const generateCharacterDistribution = async (
 		charData[oppCharCode].unique.add(oppId);
 		charData[oppCharCode].wins += didWin ? 1 : 0;
 		charData[charCode].yours += 1;
+
+		totalProcessedReplays += 1;
 	});
 
 	const csvData: charDistributionFieldType[] = [];
@@ -71,6 +75,10 @@ export const generateCharacterDistribution = async (
 	});
 	const results = csvData.sort(
 		(a, b) => b['Unique Opponents'] - a['Unique Opponents']
+	);
+
+	console.log(
+		`${replays.length} replays found (${totalProcessedReplays} processed, ${replays.length - totalProcessedReplays} skipped)`
 	);
 
 	const csv = await json2csv(results, {});

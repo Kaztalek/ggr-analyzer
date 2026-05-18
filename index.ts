@@ -18,7 +18,6 @@ const main = async () => {
 		throw new Error('REPLAY_PATHS not specified. update .env');
 	}
 	const replays = await readAllReplays(replayPaths);
-	console.log(`${replays.length} replays found`);
 	generateCharacterDistribution(replays);
 };
 
