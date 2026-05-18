@@ -5,6 +5,9 @@
 	"scripts": {
 		"pretty": "prettier --write ."
 	},
+	"dependencies": {
+		"json-2-csv": "^5.5.10"
+	},
 	"devDependencies": {
 		"bun-types": "latest",
 		"prettier": "^3.8.3"
