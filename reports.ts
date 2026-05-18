@@ -69,7 +69,7 @@ export const generateCharacterDistribution = async (
 		});
 	});
 	const results = csvData.sort(
-		(a: charDistributionFieldType, b: charDistributionFieldType) => b['Unique Opponents'] - a['Unique Opponents']
+		(a, b) => b['Unique Opponents'] - a['Unique Opponents']
 	);
 
 	const csv = await json2csv(results, {});

@@ -4,6 +4,7 @@ import path from 'path';
 
 export type gameModeType = 'single' | 'team';
 export type gameVersionType = '+R' | 'AC';
+export type winnerType = 'P1' | 'P2' | 'draw';
 export type ggrReplayType = {
 	date: Date;
 	p1SteamId: string;
@@ -23,9 +24,9 @@ export type ggrReplayType = {
 	durationInFrames: number;
 	p1Score: number;
 	p2Score: number;
-	p1Rank: string;
-	p2Rank: string;
-	winner: string;
+	p1Rank: (typeof RANKS)[number];
+	p2Rank: (typeof RANKS)[number];
+	winner: winnerType;
 };
 
 export const readAllReplays = async (
