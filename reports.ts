@@ -20,6 +20,31 @@ type charDistributionFieldType = {
 	['Matches Played As']: number;
 };
 
+type oppDistributionDataType = {
+	names: Set<string>;
+	total: number;
+	yourRoundLosses: number;
+	yourRoundWins: number;
+	yourWins: number;
+};
+type oppDistributionFieldType = {
+	ID: string;
+	Name: string;
+	['Total Matches']: number;
+	['Your Wins']: number;
+	['Your Win Rate (%)']: string;
+	['Your Round Wins']: number;
+	['Your Round Losses']: number;
+	['Also Played As']: string;
+};
+
+// replay is valid if normal 1v1 match, where you are one of the players
+const checkIsValidReplay = (replay: ggrReplayType): boolean =>
+	!replay.modifiedOptions &&
+	replay.mode === 'single' &&
+	!replay.errors.length &&
+	(replay.p1SteamId === STEAM_ID || replay.p2SteamId === STEAM_ID);
+
 export const generateCharacterDistribution = async (
 	replays: ggrReplayType[]
 ) => {
@@ -31,19 +56,10 @@ export const generateCharacterDistribution = async (
 	let totalProcessedReplays = 0;
 
 	replays.forEach((replay) => {
-		// skip replays that aren't normal 1v1 matches
-		if (
-			replay.modifiedOptions ||
-			replay.mode !== 'single' ||
-			replay.errors.length
-		) {
+		if (!checkIsValidReplay(replay)) {
 			return;
 		}
 		const isPlayer1 = STEAM_ID === replay.p1SteamId;
-		// skip replays where you are not playing
-		if (!isPlayer1 && STEAM_ID !== replay.p2SteamId) {
-			return;
-		}
 
 		const charCode = isPlayer1 ? replay.p1Char.code : replay.p2Char.code;
 		const oppCharCode = isPlayer1 ? replay.p2Char.code : replay.p1Char.code;
@@ -83,6 +99,77 @@ export const generateCharacterDistribution = async (
 
 	const csv = await json2csv(results, {});
 	const outputFilepath = './reports/character-distribution.csv';
+	await writeFile(outputFilepath, csv);
+	console.log(`Wrote ${outputFilepath}`);
+};
+
+export const generateOpponentDistribution = async (
+	replays: ggrReplayType[]
+) => {
+	const oppData: {[key: string]: oppDistributionDataType} = {};
+
+	let totalProcessedReplays = 0;
+
+	replays.forEach((replay) => {
+		if (!checkIsValidReplay(replay)) {
+			return;
+		}
+		const isPlayer1 = STEAM_ID === replay.p1SteamId;
+
+		const oppId = isPlayer1 ? replay.p2SteamId : replay.p1SteamId;
+		if (!(oppId in oppData)) {
+			oppData[oppId] = {
+				names: new Set(),
+				total: 0,
+				yourRoundLosses: 0,
+				yourRoundWins: 0,
+				yourWins: 0
+			};
+		}
+
+		const oppName = isPlayer1 ? replay.p2Name : replay.p1Name;
+		const didWin =
+			(isPlayer1 && replay.winner === 'P1') ||
+			(!isPlayer1 && replay.winner === 'P2');
+
+		oppData[oppId].names.add(oppName);
+		oppData[oppId].total += 1;
+		oppData[oppId].yourRoundLosses += isPlayer1
+			? replay.p2RoundsWon
+			: replay.p1RoundsWon;
+		oppData[oppId].yourRoundWins += isPlayer1
+			? replay.p1RoundsWon
+			: replay.p2RoundsWon;
+		oppData[oppId].yourWins += didWin ? 1 : 0;
+
+		totalProcessedReplays += 1;
+	});
+
+	const csvData: oppDistributionFieldType[] = [];
+	Object.keys(oppData).forEach((opp) => {
+		const stats = oppData[opp];
+		const names = [...stats.names];
+		csvData.push({
+			ID: `"${opp}"`,
+			Name: names[0] ?? '',
+			['Total Matches']: stats.total,
+			['Your Wins']: stats.yourWins,
+			['Your Win Rate (%)']: ((stats.yourWins / stats.total) * 100).toFixed(1),
+			['Your Round Wins']: stats.yourRoundWins,
+			['Your Round Losses']: stats.yourRoundLosses,
+			['Also Played As']: names.slice(1).join(',')
+		});
+	});
+	const results = csvData.sort(
+		(a, b) => b['Total Matches'] - a['Total Matches']
+	);
+
+	console.log(
+		`${replays.length} replays found (${totalProcessedReplays} processed, ${replays.length - totalProcessedReplays} skipped)`
+	);
+
+	const csv = await json2csv(results, {});
+	const outputFilepath = './reports/opponent-distribution.csv';
 	await writeFile(outputFilepath, csv);
 	console.log(`Wrote ${outputFilepath}`);
 };

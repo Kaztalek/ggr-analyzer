@@ -1,4 +1,7 @@
-import {generateCharacterDistribution} from './reports';
+import {
+	generateCharacterDistribution,
+	generateOpponentDistribution
+} from './reports';
 import {readAllReplays, readReplayData} from './replayUtils';
 
 const main = async () => {
@@ -19,6 +22,7 @@ const main = async () => {
 	}
 	const replays = await readAllReplays(replayPaths);
 	generateCharacterDistribution(replays);
+	generateOpponentDistribution(replays);
 };
 
 main();

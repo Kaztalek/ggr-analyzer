@@ -21,6 +21,7 @@ bun .
 
 #### Output
 `reports/character-distribution.csv`: Ranks how many unique opponents you've faced for each character, and your win rate against them
+`reports/opponent-distribution.csv`: Ranks your win rate against unique opponents
 
 ### Individual replay
 Print stats on an individual replay file:
