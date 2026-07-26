@@ -41,12 +41,20 @@ type oppDistributionFieldType = {
 	['Also Played As']: string;
 };
 
+type csvDefsType = charDistributionFieldType | oppDistributionFieldType;
+
 // replay is valid if normal 1v1 match, where you are one of the players
 const checkIsValidReplay = (replay: ggrReplayType): boolean =>
 	!replay.modifiedOptions &&
 	replay.mode === 'single' &&
 	!replay.errors.length &&
 	(replay.p1SteamId === STEAM_ID || replay.p2SteamId === STEAM_ID);
+
+const generateCsv = async (results: csvDefsType[], outputFilepath: string) => {
+	const csv = await json2csv(results, {});
+	await writeFile(outputFilepath, csv);
+	console.log(`Wrote ${outputFilepath}`);
+};
 
 export const generateReports = async (replays: ggrReplayType[]) => {
 	// init character distribution report data
@@ -132,10 +140,7 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 			(a, b) => b['Unique Opponents'] - a['Unique Opponents']
 		);
 
-		const csv = await json2csv(results, {});
-		const outputFilepath = './reports/character-distribution.csv';
-		await writeFile(outputFilepath, csv);
-		console.log(`Wrote ${outputFilepath}`);
+		generateCsv(results, './reports/character-distribution.csv');
 	}
 
 	// generate character distribution report csv
@@ -161,9 +166,6 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 			(a, b) => b['Total Matches'] - a['Total Matches']
 		);
 
-		const csv = await json2csv(results, {});
-		const outputFilepath = './reports/opponent-distribution.csv';
-		await writeFile(outputFilepath, csv);
-		console.log(`Wrote ${outputFilepath}`);
+		generateCsv(results, './reports/opponent-distribution.csv');
 	}
 };
