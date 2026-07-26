@@ -1,7 +1,4 @@
-import {
-	generateCharacterDistribution,
-	generateOpponentDistribution
-} from './reports';
+import {generateReports} from './reports';
 import {readAllReplays, readReplayData} from './replayUtils';
 
 const main = async () => {
@@ -21,8 +18,7 @@ const main = async () => {
 		throw new Error('REPLAY_PATHS not specified. update .env');
 	}
 	const replays = await readAllReplays(replayPaths);
-	generateCharacterDistribution(replays);
-	generateOpponentDistribution(replays);
+	generateReports(replays);
 };
 
 main();
