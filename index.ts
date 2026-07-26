@@ -1,5 +1,5 @@
-import {generateReports} from './reports';
-import {readAllReplays, readReplayData} from './replayUtils';
+import {generateReports} from './src/reports';
+import {readAllReplays, readReplayData} from './src/replayUtils';
 
 const main = async () => {
 	const filename = process.argv[2];
