@@ -4,9 +4,11 @@ import {json2csv} from 'json-2-csv';
 import {writeFile} from 'fs/promises';
 
 const STEAM_ID = process.env.STEAM_ID;
+const OPP_STEAM_ID = process.env.OPP_STEAM_ID;
 // which reports to generate?
 const CHAR_DIST_REPORT_ENABLED = true;
 const OPP_DIST_REPORT_ENABLED = true;
+const H2H_REPORT_ENABLED = !!OPP_STEAM_ID;
 
 type charDistributionDataType = {
 	total: number;
@@ -41,7 +43,25 @@ type oppDistributionFieldType = {
 	['Also Played As']: string;
 };
 
-type csvDefsType = charDistributionFieldType | oppDistributionFieldType;
+type h2hDataType = {
+	total: number;
+	yourRoundLosses: number;
+	yourRoundWins: number;
+	yourWins: number;
+};
+type h2hFieldType = {
+	['Matchup (You-Them)']: string;
+	['Total Matches']: number;
+	['Your Wins']: number;
+	['Your Win Rate (%)']: string;
+	['Your Round Wins']: number;
+	['Your Round Losses']: number;
+};
+
+type csvDefsType =
+	| charDistributionFieldType
+	| oppDistributionFieldType
+	| h2hFieldType;
 
 // replay is valid if normal 1v1 match, where you are one of the players
 const checkIsValidReplay = (replay: ggrReplayType): boolean =>
@@ -68,6 +88,10 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 	// init opponent distribution report data
 	const oppData: {[key: string]: oppDistributionDataType} = {};
 
+	// init head-to-head report data
+	const h2hData: {[key: string]: h2hDataType} = {};
+	let h2hOppName = '';
+
 	let totalProcessedReplays = 0;
 
 	replays.forEach((replay) => {
@@ -77,14 +101,13 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 		// common data between reports
 		const isPlayer1 = STEAM_ID === replay.p1SteamId;
 		const oppId = isPlayer1 ? replay.p2SteamId : replay.p1SteamId;
+		const charCode = isPlayer1 ? replay.p1Char.code : replay.p2Char.code;
+		const oppCharCode = isPlayer1 ? replay.p2Char.code : replay.p1Char.code;
 		const didWin =
 			(isPlayer1 && replay.winner === 'P1') ||
 			(!isPlayer1 && replay.winner === 'P2');
 
 		if (CHAR_DIST_REPORT_ENABLED) {
-			const charCode = isPlayer1 ? replay.p1Char.code : replay.p2Char.code;
-			const oppCharCode = isPlayer1 ? replay.p2Char.code : replay.p1Char.code;
-
 			charData[oppCharCode].total += 1;
 			charData[oppCharCode].unique.add(oppId);
 			charData[oppCharCode].wins += didWin ? 1 : 0;
@@ -112,6 +135,30 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 				? replay.p1RoundsWon
 				: replay.p2RoundsWon;
 			oppData[oppId].yourWins += didWin ? 1 : 0;
+		}
+
+		if (H2H_REPORT_ENABLED && oppId === OPP_STEAM_ID) {
+			if (!h2hOppName) {
+				h2hOppName = isPlayer1 ? replay.p2Name : replay.p1Name;
+			}
+			const matchKey = `${charCode}-${oppCharCode}`;
+			if (!(matchKey in h2hData)) {
+				h2hData[matchKey] = {
+					total: 0,
+					yourRoundLosses: 0,
+					yourRoundWins: 0,
+					yourWins: 0
+				};
+			}
+
+			h2hData[matchKey].total += 1;
+			h2hData[matchKey].yourRoundLosses += isPlayer1
+				? replay.p2RoundsWon
+				: replay.p1RoundsWon;
+			h2hData[matchKey].yourRoundWins += isPlayer1
+				? replay.p1RoundsWon
+				: replay.p2RoundsWon;
+			h2hData[matchKey].yourWins += didWin ? 1 : 0;
 		}
 
 		totalProcessedReplays += 1;
@@ -167,5 +214,28 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 		);
 
 		generateCsv(results, './reports/opponent-distribution.csv');
+	}
+
+	// generate head-to-head report csv
+	if (H2H_REPORT_ENABLED) {
+		const csvData: h2hFieldType[] = [];
+		Object.keys(h2hData).forEach((matchKey) => {
+			const stats = h2hData[matchKey];
+			csvData.push({
+				['Matchup (You-Them)']: matchKey,
+				['Total Matches']: stats.total,
+				['Your Wins']: stats.yourWins,
+				['Your Win Rate (%)']: ((stats.yourWins / stats.total) * 100).toFixed(
+					1
+				),
+				['Your Round Wins']: stats.yourRoundWins,
+				['Your Round Losses']: stats.yourRoundLosses
+			});
+		});
+		const results = csvData.sort(
+			(a, b) => b['Total Matches'] - a['Total Matches']
+		);
+
+		generateCsv(results, `./reports/head-to-head_${h2hOppName}.csv`);
 	}
 };
