@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="assets/icons/SO.png" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<title>GGR Analyzer</title>
+	</head>
+	<body>
+		<div>
+			<canvas id="chart"></canvas>
+		</div>
+
+		<script src="node_modules/chart.js/dist/chart.umd.min.js"></script>
+		<script src="node_modules/moment/min/moment.min.js"></script>
+		<script src="node_modules/hammerjs/hammer.min.js"></script>
+		<script src="node_modules/chartjs-adapter-moment/dist/chartjs-adapter-moment.min.js"></script>
+		<script src="node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+
+		<script>
+			const generateChart = (data) => {
+				const chartData = [];
+				let totalMatches = 0;
+				let wins = 0;
+				data.forEach((match) => {
+					totalMatches += 1;
+					wins += match.didWin ? 1 : 0;
+					chartData.push({
+						x: match.date,
+						y: ((wins / totalMatches) * 100).toFixed(1)
+					});
+				});
+
+				const ctx = document.getElementById('chart');
+
+				new Chart(ctx, {
+					type: 'line',
+					data: {
+						datasets: [
+							{
+								label: 'Win Rate (%)',
+								data: chartData
+							}
+						]
+					},
+					options: {
+						scales: {
+							x: {
+								type: 'time',
+								time: {
+									tooltipFormat: 'YYYY-MM-DD HH:mm:ss',
+									displayFormats: {
+										millisecond: 'MMM DD YYYY ha',
+										seconds: 'MMM DD YYYY ha',
+										minute: 'MMM DD YYYY ha',
+										hour: 'MMM DD YYYY ha',
+										day: 'MMM DD YYYY',
+										week: 'MMM DD YYYY',
+										month: 'MMM YYYY',
+										quarter: 'MMM YYYY',
+										year: 'YYYY'
+									}
+								},
+								title: {
+									display: true,
+									text: 'Date'
+								}
+							},
+							y: {
+								beginAtZero: true,
+								title: {
+									display: true,
+									text: 'Win Rate (%)'
+								}
+							}
+						},
+						plugins: {
+							zoom: {
+								pan: {
+									enabled: true,
+									mode: 'xy'
+								},
+								limits: {
+									x: {
+										min: 'original',
+										max: 'original'
+									},
+									y: {
+										min: 0,
+										max: 100
+									}
+								},
+								zoom: {
+									wheel: {
+										enabled: true
+									},
+									pinch: {
+										enabled: true
+									},
+									mode: 'xy'
+								}
+							}
+						}
+					}
+				});
+			};
+
+			// TODO generate html from js instead
+			fetch('./chartData.json')
+				.then((response) => response.json())
+				.then((data) => {
+					generateChart(data);
+				})
+				.catch((error) => console.error('error fetching chart data:', error));
+		</script>
+	</body>
+</html>

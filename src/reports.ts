@@ -77,6 +77,8 @@ const generateCsv = async (results: csvDefsType[], outputFilepath: string) => {
 };
 
 export const generateReports = async (replays: ggrReplayType[]) => {
+	const allData = [];
+
 	// init character distribution report data
 	const charData: {[key: string]: charDistributionDataType} = {};
 	if (CHAR_DIST_REPORT_ENABLED) {
@@ -106,6 +108,13 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 		const didWin =
 			(isPlayer1 && replay.winner === 'P1') ||
 			(!isPlayer1 && replay.winner === 'P2');
+
+		allData.push({
+			charCode,
+			date: replay.date,
+			didWin,
+			oppCharCode
+		});
 
 		if (CHAR_DIST_REPORT_ENABLED) {
 			charData[oppCharCode].total += 1;
@@ -166,6 +175,11 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 
 	console.log(
 		`${replays.length} replays found (${totalProcessedReplays} processed, ${replays.length - totalProcessedReplays} skipped)`
+	);
+
+	await writeFile(
+		'./chartData.json',
+		JSON.stringify(allData.sort((a, b) => a.date - b.date))
 	);
 
 	// generate character distribution report csv
