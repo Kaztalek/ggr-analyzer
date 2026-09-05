@@ -16,6 +16,7 @@
 			<canvas id="chart"></canvas>
 		</div>
 
+		<script src="replayData.js"></script>
 		<script src="node_modules/chart.js/dist/chart.umd.min.js"></script>
 		<script src="node_modules/moment/min/moment.min.js"></script>
 		<script src="node_modules/hammerjs/hammer.min.js"></script>
@@ -23,100 +24,90 @@
 		<script src="node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
 
 		<script>
-			const generateChart = (data) => {
-				const chartData = [];
-				let totalMatches = 0;
-				let wins = 0;
-				data.forEach((match) => {
-					totalMatches += 1;
-					wins += match.didWin ? 1 : 0;
-					chartData.push({
-						x: match.date,
-						y: ((wins / totalMatches) * 100).toFixed(1)
-					});
+			const chartData = [];
+			let totalReplays = 0;
+			let wins = 0;
+			replayData.forEach((replay) => {
+				totalReplays += 1;
+				wins += replay.didWin ? 1 : 0;
+				chartData.push({
+					x: replay.date,
+					y: ((wins / totalReplays) * 100).toFixed(1)
 				});
+			});
 
-				const ctx = document.getElementById('chart');
+			const ctx = document.getElementById('chart');
 
-				new Chart(ctx, {
-					type: 'line',
-					data: {
-						datasets: [
-							{
-								label: 'Win Rate (%)',
-								data: chartData
-							}
-						]
-					},
-					options: {
-						scales: {
-							x: {
-								type: 'time',
-								time: {
-									tooltipFormat: 'YYYY-MM-DD HH:mm:ss',
-									displayFormats: {
-										millisecond: 'MMM DD YYYY ha',
-										seconds: 'MMM DD YYYY ha',
-										minute: 'MMM DD YYYY ha',
-										hour: 'MMM DD YYYY ha',
-										day: 'MMM DD YYYY',
-										week: 'MMM DD YYYY',
-										month: 'MMM YYYY',
-										quarter: 'MMM YYYY',
-										year: 'YYYY'
-									}
-								},
-								title: {
-									display: true,
-									text: 'Date'
+			new Chart(ctx, {
+				type: 'line',
+				data: {
+					datasets: [
+						{
+							label: 'Win Rate (%)',
+							data: chartData
+						}
+					]
+				},
+				options: {
+					scales: {
+						x: {
+							type: 'time',
+							time: {
+								tooltipFormat: 'YYYY-MM-DD HH:mm:ss',
+								displayFormats: {
+									millisecond: 'MMM DD YYYY ha',
+									seconds: 'MMM DD YYYY ha',
+									minute: 'MMM DD YYYY ha',
+									hour: 'MMM DD YYYY ha',
+									day: 'MMM DD YYYY',
+									week: 'MMM DD YYYY',
+									month: 'MMM YYYY',
+									quarter: 'MMM YYYY',
+									year: 'YYYY'
 								}
 							},
-							y: {
-								beginAtZero: true,
-								title: {
-									display: true,
-									text: 'Win Rate (%)'
-								}
+							title: {
+								display: true,
+								text: 'Date'
 							}
 						},
-						plugins: {
-							zoom: {
-								pan: {
-									enabled: true,
-									mode: 'xy'
+						y: {
+							beginAtZero: true,
+							title: {
+								display: true,
+								text: 'Win Rate (%)'
+							}
+						}
+					},
+					plugins: {
+						zoom: {
+							pan: {
+								enabled: true,
+								mode: 'xy'
+							},
+							limits: {
+								x: {
+									min: 'original',
+									max: 'original'
 								},
-								limits: {
-									x: {
-										min: 'original',
-										max: 'original'
-									},
-									y: {
-										min: 0,
-										max: 100
-									}
-								},
-								zoom: {
-									wheel: {
-										enabled: true
-									},
-									pinch: {
-										enabled: true
-									},
-									mode: 'xy'
+								y: {
+									min: 0,
+									max: 100
 								}
+							},
+							zoom: {
+								wheel: {
+									enabled: true
+								},
+								pinch: {
+									enabled: true
+								},
+								mode: 'xy'
 							}
 						}
 					}
-				});
-			};
-
-			// TODO generate html from js instead
-			fetch('./chartData.json')
-				.then((response) => response.json())
-				.then((data) => {
-					generateChart(data);
-				})
-				.catch((error) => console.error('error fetching chart data:', error));
+				}
+			});
 		</script>
 	</body>
 </html>
