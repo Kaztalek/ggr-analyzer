@@ -3,17 +3,41 @@
 	<head>
 		<meta charset="UTF-8" />
 		<link
+			rel="stylesheet"
+			href="../src/html/styles.css" />
+		<link
 			rel="icon"
 			type="image/x-icon"
-			href="assets/icons/SO.png" />
+			href="../assets/icons/SO.png" />
 		<meta
 			name="viewport"
 			content="width=device-width, initial-scale=1.0" />
 		<title>GGR Analyzer</title>
 	</head>
 	<body>
-		<div>
-			<canvas id="chart"></canvas>
+		<div
+			id="app"
+			v-cloak>
+			<div id="content">
+				<div id="chart-container">
+					<canvas id="chart"></canvas>
+					<button @click="resetZoom">Reset Zoom</button>
+				</div>
+				<div id="sidebar">
+					<span>{{totalReplays}} replays</span>
+					<div>
+						<div
+							v-for="char in characterData"
+							class="character-selector">
+							<img :src="`../assets/icons/${char.code}.png`" />
+							<div>
+								{{char.name}} ({{char.replayTotal}} game{{char.replayTotal === 1
+								? '' : 's'}})
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<script src="../node_modules/chart.js/dist/chart.umd.min.js"></script>
@@ -21,6 +45,7 @@
 		<script src="../node_modules/hammerjs/hammer.min.js"></script>
 		<script src="../node_modules/chartjs-adapter-moment/dist/chartjs-adapter-moment.min.js"></script>
 		<script src="../node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+		<script src="../node_modules/vue/dist/vue.global.js"></script>
 		<script src="../src/html/replayData.js"></script>
 		<script src="../src/html/main.js"></script>
 	</body>
