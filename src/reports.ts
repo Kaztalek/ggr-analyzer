@@ -191,7 +191,7 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 	// export data for HTML report
 	if (HTML_REPORT_ENABLED) {
 		await writeFile(
-			'./replayData.js',
+			'./src/html/replayData.js',
 			`window.replayData = ${JSON.stringify(allData.sort((a, b) => a.date.getTime() - b.date.getTime()))};`
 		);
 	}
