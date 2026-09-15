@@ -22,6 +22,16 @@
 				<div id="chart-container">
 					<canvas id="chart"></canvas>
 					<button @click="resetZoom">Reset Zoom</button>
+					<div>
+						Game Count
+						<select v-model="gameDisplayCount">
+							<option
+								v-for="option in gameDisplayOptions"
+								:value="option.value">
+								{{option.text}}
+							</option>
+						</select>
+					</div>
 				</div>
 				<div id="sidebar">
 					<span>{{totalReplays}} total games</span>

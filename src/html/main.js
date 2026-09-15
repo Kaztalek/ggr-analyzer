@@ -1,4 +1,4 @@
-const {createApp, ref} = Vue;
+const {createApp, onMounted, ref, watch} = Vue;
 
 // dominant color gotten from parsing icons here: https://lokeshdhakar.com/projects/color-thief/
 // used 2nd dominant color for Sol to differentiate SO and OR
@@ -62,13 +62,144 @@ const filterDatasets = (datasets, filterFn) =>
 
 createApp({
 	setup() {
+		let chart;
 		const resetZoom = () => {
-			CHART.resetZoom();
+			chart.resetZoom();
 		};
 		const characterData = ref(getCharacterData());
 		const totalReplays = ref(replayData.length);
+		const gameDisplayCount = ref(100);
+		const gameDisplayOptions = ref([
+			{text: 100, value: 100},
+			{text: 500, value: 500},
+			{text: 1000, value: 1000},
+			{text: `All (${replayData.length})`, value: replayData.length}
+		]);
+
+		const datasets = [
+			{
+				data: replayData,
+				label: 'All characters',
+				borderColor: '#7bedd4',
+				backgroundColor: '#7bedd4cc' // TODO redundant code
+			},
+			...Object.values(
+				replayData.reduce((charSets, replay) => {
+					const charSet = (charSets[replay.charCode] ??= {
+						data: [],
+						label: replay.charCode,
+						hidden: true,
+						borderColor: CHARACTERS[replay.charCode].color,
+						backgroundColor: `${CHARACTERS[replay.charCode].color}cc`
+					});
+
+					charSet.data.push(replay);
+
+					return charSets;
+				}, {})
+			).sort((a, b) => b.data.length - a.data.length)
+		];
+
+		onMounted(() => {
+			chart = new Chart(document.getElementById('chart'), {
+				type: 'line',
+				options: {
+					scales: {
+						x: {
+							type: 'linear',
+							min: 1,
+							title: {
+								display: true
+							}
+						},
+						// TODO have time-scaled x-axis option in the future
+						// x: {
+						// 	type: 'time',
+						// 	time: {
+						// 		tooltipFormat: 'YYYY-MM-DD HH:mm:ss',
+						// 		displayFormats: {
+						// 			millisecond: 'MMM DD YYYY ha',
+						// 			seconds: 'MMM DD YYYY ha',
+						// 			minute: 'MMM DD YYYY ha',
+						// 			hour: 'MMM DD YYYY ha',
+						// 			day: 'MMM DD YYYY',
+						// 			week: 'MMM DD YYYY',
+						// 			month: 'MMM YYYY',
+						// 			quarter: 'MMM YYYY',
+						// 			year: 'YYYY'
+						// 		}
+						// 	},
+						// 	title: {
+						// 		display: true,
+						// 		text: 'Date'
+						// 	}
+						// },
+						y: {
+							beginAtZero: true,
+							title: {
+								display: true,
+								text: 'Win Rate (%)'
+							}
+						}
+					},
+					plugins: {
+						tooltip: {
+							callbacks: {
+								title: (items) =>
+									moment(items[0].dataset.data[items[0].dataIndex].date).format(
+										'YYYY-MM-DD HH:mm:ss'
+									),
+								label: (context) =>
+									`${CHARACTERS[context.raw.charCode]?.name ?? context.raw.charCode}: ${context.formattedValue}%`
+							}
+						},
+						zoom: {
+							pan: {
+								enabled: true,
+								mode: 'xy'
+							},
+							limits: {
+								x: {
+									min: 'original',
+									max: 'original'
+								},
+								y: {
+									min: 0,
+									max: 100
+								}
+							},
+							zoom: {
+								wheel: {
+									enabled: true
+								},
+								pinch: {
+									enabled: true
+								},
+								mode: 'xy'
+							}
+						}
+					}
+				}
+			});
+
+			// filter chart to last n games
+			watch(
+				gameDisplayCount,
+				(newValue) => {
+					chart.data.datasets = filterDatasets(datasets, (data) =>
+						data.slice(-newValue)
+					);
+					chart.options.scales.x.title.text = `Last ${newValue} games`;
+					chart.update();
+				},
+				{immediate: true}
+			);
+		});
+
 		return {
 			characterData,
+			gameDisplayCount,
+			gameDisplayOptions,
 			resetZoom,
 			totalReplays
 		};
@@ -76,115 +207,3 @@ createApp({
 }).mount('#app');
 
 // TODO handle case where replayData doesn't exist
-
-const datasets = [
-	{
-		data: replayData,
-		label: 'All characters',
-		borderColor: '#7bedd4',
-		backgroundColor: '#7bedd4cc' // TODO redundant code
-	},
-	...Object.values(
-		replayData.reduce((charSets, replay) => {
-			const charSet = (charSets[replay.charCode] ??= {
-				data: [],
-				label: replay.charCode,
-				hidden: true,
-				borderColor: CHARACTERS[replay.charCode].color,
-				backgroundColor: `${CHARACTERS[replay.charCode].color}cc`
-			});
-
-			charSet.data.push(replay);
-
-			return charSets;
-		}, {})
-	).sort((a, b) => b.data.length - a.data.length)
-];
-
-// filter to last 100 games
-const filteredDatasets = filterDatasets(datasets, data => data.slice(-100));
-
-const CHART = new Chart(document.getElementById('chart'), {
-	type: 'line',
-	data: {
-		datasets: filteredDatasets
-	},
-	options: {
-		scales: {
-			x: {
-				type: 'linear',
-				min: 1,
-				title: {
-					display: true,
-					text: 'Last 100 games'
-				}
-			},
-			// TODO have time-scaled x-axis option in the future
-			// x: {
-			// 	type: 'time',
-			// 	time: {
-			// 		tooltipFormat: 'YYYY-MM-DD HH:mm:ss',
-			// 		displayFormats: {
-			// 			millisecond: 'MMM DD YYYY ha',
-			// 			seconds: 'MMM DD YYYY ha',
-			// 			minute: 'MMM DD YYYY ha',
-			// 			hour: 'MMM DD YYYY ha',
-			// 			day: 'MMM DD YYYY',
-			// 			week: 'MMM DD YYYY',
-			// 			month: 'MMM YYYY',
-			// 			quarter: 'MMM YYYY',
-			// 			year: 'YYYY'
-			// 		}
-			// 	},
-			// 	title: {
-			// 		display: true,
-			// 		text: 'Date'
-			// 	}
-			// },
-			y: {
-				beginAtZero: true,
-				title: {
-					display: true,
-					text: 'Win Rate (%)'
-				}
-			}
-		},
-		plugins: {
-			tooltip: {
-				callbacks: {
-					title: (items) =>
-						moment(items[0].dataset.data[items[0].dataIndex].date).format(
-							'YYYY-MM-DD HH:mm:ss'
-						),
-					label: (context) =>
-						`${CHARACTERS[context.raw.charCode]?.name ?? context.raw.charCode}: ${context.formattedValue}%`
-				}
-			},
-			zoom: {
-				pan: {
-					enabled: true,
-					mode: 'xy'
-				},
-				limits: {
-					x: {
-						min: 'original',
-						max: 'original'
-					},
-					y: {
-						min: 0,
-						max: 100
-					}
-				},
-				zoom: {
-					wheel: {
-						enabled: true
-					},
-					pinch: {
-						enabled: true
-					},
-					mode: 'xy'
-				}
-			}
-		}
-	}
-});
