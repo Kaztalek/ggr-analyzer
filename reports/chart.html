@@ -28,7 +28,8 @@
 					<div>
 						<div
 							v-for="char in characterData"
-							class="character-selector">
+							class="character-selector"
+							:style="`border-color: ${char.color}`">
 							<img :src="`../assets/icons/${char.code}.png`" />
 							<div>
 								{{char.name}} ({{char.replayTotal}} game{{char.replayTotal === 1

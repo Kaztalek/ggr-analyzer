@@ -41,6 +41,25 @@ const getCharacterData = () => {
 	})).sort((a, b) => b.replayTotal - a.replayTotal);
 };
 
+const filterDatasets = (datasets, filterFn) =>
+	datasets.map((dataset) => {
+		let wins = 0;
+
+		return {
+			...dataset,
+			data: filterFn(dataset.data).map((replay, i) => {
+				if (replay.didWin) {
+					wins += 1;
+				}
+				return {
+					...replay,
+					x: i + 1,
+					y: ((wins / (i + 1)) * 100).toFixed(1)
+				};
+			})
+		};
+	});
+
 createApp({
 	setup() {
 		const resetZoom = () => {
@@ -58,22 +77,9 @@ createApp({
 
 // TODO handle case where replayData doesn't exist
 
-let wins = 0;
-const cumulativeData = replayData.map((replay, i) => {
-	if (replay.didWin) {
-		wins += 1;
-	}
-
-	return {
-		...replay,
-		x: i + 1,
-		y: ((wins / (i + 1)) * 100).toFixed(1)
-	};
-});
-
 const datasets = [
 	{
-		data: cumulativeData,
+		data: replayData,
 		label: 'All characters',
 		borderColor: '#7bedd4',
 		backgroundColor: '#7bedd4cc' // TODO redundant code
@@ -84,36 +90,19 @@ const datasets = [
 				data: [],
 				label: replay.charCode,
 				hidden: true,
-				wins: 0,
 				borderColor: CHARACTERS[replay.charCode].color,
 				backgroundColor: `${CHARACTERS[replay.charCode].color}cc`
 			});
 
-			if (replay.didWin) {
-				charSet.wins += 1;
-			}
-
-			charSet.data.push({
-				...replay,
-				x: charSet.data.length + 1,
-				y: ((charSet.wins / (charSet.data.length + 1)) * 100).toFixed(1)
-			});
+			charSet.data.push(replay);
 
 			return charSets;
 		}, {})
 	).sort((a, b) => b.data.length - a.data.length)
 ];
 
-// TODO move to function
-// TODO calculate new running percentage
 // filter to last 100 games
-const filteredDatasets = datasets.map((dataset) => ({
-	...dataset,
-	data: dataset.data.slice(-100).map((replay, i) => ({
-		...replay,
-		x: i + 1
-	}))
-}));
+const filteredDatasets = filterDatasets(datasets, data => data.slice(-100));
 
 const CHART = new Chart(document.getElementById('chart'), {
 	type: 'line',
