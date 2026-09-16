@@ -30,3 +30,7 @@
 	border: 2px solid;
 	cursor: pointer;
 }
+
+.character-selector--selected {
+	background-color: #c7f2ea;
+}

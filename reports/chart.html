@@ -39,6 +39,8 @@
 						<div
 							v-for="char in characterData"
 							class="character-selector"
+							:class="{'character-selector--selected': characterVisibility[char.code]}"
+							@click="characterVisibility[char.code] = !characterVisibility[char.code]"
 							:style="`border-color: ${char.color}`">
 							<img :src="`../assets/icons/${char.code}.png`" />
 							<div>

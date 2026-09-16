@@ -60,6 +60,30 @@ const filterDatasets = (datasets, filterFn) =>
 		};
 	});
 
+const datasets = [
+	{
+		data: replayData,
+		label: 'All characters',
+		borderColor: '#7bedd4',
+		backgroundColor: '#7bedd4cc' // TODO redundant code
+	},
+	...Object.values(
+		replayData.reduce((charSets, replay) => {
+			const charSet = (charSets[replay.charCode] ??= {
+				data: [],
+				label: replay.charCode,
+				hidden: true,
+				borderColor: CHARACTERS[replay.charCode].color,
+				backgroundColor: `${CHARACTERS[replay.charCode].color}cc`
+			});
+
+			charSet.data.push(replay);
+
+			return charSets;
+		}, {})
+	).sort((a, b) => b.data.length - a.data.length)
+];
+
 createApp({
 	setup() {
 		let chart;
@@ -67,6 +91,10 @@ createApp({
 			chart.resetZoom();
 		};
 		const characterData = ref(getCharacterData());
+		const characterVisibility = ref({
+			'All characters': true, // TODO clean up
+			...Object.fromEntries(Object.keys(CHARACTERS).map((key) => [key, false]))
+		});
 		const totalReplays = ref(replayData.length);
 		const gameDisplayCount = ref(100);
 		const gameDisplayOptions = ref([
@@ -75,30 +103,6 @@ createApp({
 			{text: 1000, value: 1000},
 			{text: `All (${replayData.length})`, value: replayData.length}
 		]);
-
-		const datasets = [
-			{
-				data: replayData,
-				label: 'All characters',
-				borderColor: '#7bedd4',
-				backgroundColor: '#7bedd4cc' // TODO redundant code
-			},
-			...Object.values(
-				replayData.reduce((charSets, replay) => {
-					const charSet = (charSets[replay.charCode] ??= {
-						data: [],
-						label: replay.charCode,
-						hidden: true,
-						borderColor: CHARACTERS[replay.charCode].color,
-						backgroundColor: `${CHARACTERS[replay.charCode].color}cc`
-					});
-
-					charSet.data.push(replay);
-
-					return charSets;
-				}, {})
-			).sort((a, b) => b.data.length - a.data.length)
-		];
 
 		onMounted(() => {
 			chart = new Chart(document.getElementById('chart'), {
@@ -194,10 +198,33 @@ createApp({
 				},
 				{immediate: true}
 			);
+
+			// toggle visibility of character
+			// TODO sync with chart
+			// TODO toggle "all" as well
+			watch(
+				characterVisibility,
+				(newValue) => {
+					datasets.forEach((dataset, i) => {
+						if (newValue[dataset.label] !== chart.isDatasetVisible(i)) {
+							// click legend directly to keep animations
+							// otherwise, use chart.setDataVisibility and chart.update
+							chart.options.plugins.legend.onClick.call(
+								chart,
+								null,
+								{datasetIndex: i},
+								chart.legend
+							);
+						}
+					});
+				},
+				{deep: true}
+			);
 		});
 
 		return {
 			characterData,
+			characterVisibility,
 			gameDisplayCount,
 			gameDisplayOptions,
 			resetZoom,
