@@ -84,9 +84,27 @@ const datasets = [
 	).sort((a, b) => b.data.length - a.data.length)
 ];
 
+// Chart.js object
+let chart;
+
+// keep chart updates in sync with our Vue data
+const syncChart = (characterVisibility) => {
+	datasets.forEach((dataset, i) => {
+		if (characterVisibility[dataset.label] !== chart.isDatasetVisible(i)) {
+			// click legend directly to keep animations
+			// otherwise, use chart.setDataVisibility and chart.update
+			chart.options.plugins.legend.onClick.call(
+				chart,
+				null,
+				{datasetIndex: i},
+				chart.legend
+			);
+		}
+	});
+};
+
 createApp({
 	setup() {
-		let chart;
 		const resetZoom = () => {
 			chart.resetZoom();
 		};
@@ -147,6 +165,9 @@ createApp({
 						}
 					},
 					plugins: {
+						legend: {
+							display: false
+						},
 						tooltip: {
 							callbacks: {
 								title: (items) =>
@@ -195,28 +216,17 @@ createApp({
 					);
 					chart.options.scales.x.title.text = `Last ${newValue} games`;
 					chart.update();
+					syncChart(characterVisibility.value);
 				},
 				{immediate: true}
 			);
 
 			// toggle visibility of character
-			// TODO sync with chart
 			// TODO toggle "all" as well
 			watch(
 				characterVisibility,
 				(newValue) => {
-					datasets.forEach((dataset, i) => {
-						if (newValue[dataset.label] !== chart.isDatasetVisible(i)) {
-							// click legend directly to keep animations
-							// otherwise, use chart.setDataVisibility and chart.update
-							chart.options.plugins.legend.onClick.call(
-								chart,
-								null,
-								{datasetIndex: i},
-								chart.legend
-							);
-						}
-					});
+					syncChart(newValue);
 				},
 				{deep: true}
 			);
