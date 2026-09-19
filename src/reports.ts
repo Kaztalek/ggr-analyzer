@@ -6,9 +6,17 @@ import {writeFile} from 'fs/promises';
 const STEAM_ID = process.env.STEAM_ID;
 const OPP_STEAM_ID = process.env.OPP_STEAM_ID;
 // which reports to generate?
+const HTML_REPORT_ENABLED = true;
 const CHAR_DIST_REPORT_ENABLED = true;
 const OPP_DIST_REPORT_ENABLED = true;
 const H2H_REPORT_ENABLED = !!OPP_STEAM_ID;
+
+type allReplayDataType = {
+	charCode: (typeof CHARACTERS)[number]['code'];
+	date: Date;
+	didWin: boolean;
+	oppCharCode: (typeof CHARACTERS)[number]['code'];
+};
 
 type charDistributionDataType = {
 	total: number;
@@ -77,6 +85,9 @@ const generateCsv = async (results: csvDefsType[], outputFilepath: string) => {
 };
 
 export const generateReports = async (replays: ggrReplayType[]) => {
+	// init data export for HTML report
+	const allData: allReplayDataType[] = [];
+
 	// init character distribution report data
 	const charData: {[key: string]: charDistributionDataType} = {};
 	if (CHAR_DIST_REPORT_ENABLED) {
@@ -106,6 +117,15 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 		const didWin =
 			(isPlayer1 && replay.winner === 'P1') ||
 			(!isPlayer1 && replay.winner === 'P2');
+
+		if (HTML_REPORT_ENABLED) {
+			allData.push({
+				charCode,
+				date: replay.date,
+				didWin,
+				oppCharCode
+			});
+		}
 
 		if (CHAR_DIST_REPORT_ENABLED) {
 			charData[oppCharCode].total += 1;
@@ -167,6 +187,14 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 	console.log(
 		`${replays.length} replays found (${totalProcessedReplays} processed, ${replays.length - totalProcessedReplays} skipped)`
 	);
+
+	// export data for HTML report
+	if (HTML_REPORT_ENABLED) {
+		await writeFile(
+			'./src/html/replayData.js',
+			`window.replayData = ${JSON.stringify(allData.sort((a, b) => a.date.getTime() - b.date.getTime()))};`
+		);
+	}
 
 	// generate character distribution report csv
 	if (CHAR_DIST_REPORT_ENABLED) {

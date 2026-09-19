@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link
+			rel="stylesheet"
+			href="../src/html/styles.css" />
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="../assets/icons/SO.png" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<title>GGR Analyzer</title>
+	</head>
+	<body>
+		<div
+			id="app"
+			v-cloak>
+			<div id="content">
+				<div class="legend">
+					<button
+						class="character-selector"
+						:class="{'character-selector--selected': characterVisibility[ALL_CHAR_KEY]}"
+						@click="characterVisibility[ALL_CHAR_KEY] = !characterVisibility[ALL_CHAR_KEY]">
+						All ({{totalReplays}} games)
+					</button>
+					<button
+						v-for="char in characterData"
+						class="character-selector"
+						:class="{'character-selector--selected': characterVisibility[char.code]}"
+						@click="characterVisibility[char.code] = !characterVisibility[char.code]"
+						:style="`border-color: ${char.color}`">
+						<img :src="`../assets/icons/${char.code}.png`" />
+						<div>{{char.name}} ({{char.replayTotal}})</div>
+					</button>
+				</div>
+				<div v-if="!totalReplays">
+					No replays found!
+					<br />
+					See README.md for instructions on setting up and generating reports.
+				</div>
+				<div
+					v-show="totalReplays"
+					class="chart-container">
+					<canvas
+						id="win-rate-chart"
+						class="chart"></canvas>
+				</div>
+				<div
+					v-show="totalReplays"
+					class="chart-controls">
+					<div>
+						Game Count:
+						<select v-model="gameDisplayCount">
+							<option
+								v-for="option in gameDisplayOptions"
+								:value="option.value">
+								{{option.text}}
+							</option>
+						</select>
+					</div>
+					<button
+						class="reset-zoom"
+						@click="resetZoom">
+						Reset Zoom
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script src="../node_modules/chart.js/dist/chart.umd.min.js"></script>
+		<script src="../node_modules/moment/min/moment.min.js"></script>
+		<script src="../node_modules/hammerjs/hammer.min.js"></script>
+		<script src="../node_modules/chartjs-adapter-moment/dist/chartjs-adapter-moment.min.js"></script>
+		<script src="../node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+		<script src="../node_modules/vue/dist/vue.global.js"></script>
+		<script src="../src/html/replayData.js"></script>
+		<script src="../src/html/main.js"></script>
+	</body>
+</html>
