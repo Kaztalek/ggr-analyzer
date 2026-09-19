@@ -19,35 +19,43 @@
 			id="app"
 			v-cloak>
 			<div id="content">
-				<div id="chart-container">
-					<canvas id="chart"></canvas>
-					<button @click="resetZoom">Reset Zoom</button>
-					<div>
-						Game Count
-						<select v-model="gameDisplayCount">
-							<option
-								v-for="option in gameDisplayOptions"
-								:value="option.value">
-								{{option.text}}
-							</option>
-						</select>
-					</div>
+				<div class="legend">
+					<button
+						class="character-selector"
+						:class="{'character-selector--selected': characterVisibility[ALL_CHAR_KEY]}"
+						@click="characterVisibility[ALL_CHAR_KEY] = !characterVisibility[ALL_CHAR_KEY]">
+						All ({{totalReplays}} games)
+					</button>
+					<button
+						v-for="char in characterData"
+						class="character-selector"
+						:class="{'character-selector--selected': characterVisibility[char.code]}"
+						@click="characterVisibility[char.code] = !characterVisibility[char.code]"
+						:style="`border-color: ${char.color}`">
+						<img :src="`../assets/icons/${char.code}.png`" />
+						<div>{{char.name}} ({{char.replayTotal}})</div>
+					</button>
 				</div>
-				<div id="sidebar">
-					<span>{{totalReplays}} total games</span>
-					<div>
-						<div
-							v-for="char in characterData"
-							class="character-selector"
-							:class="{'character-selector--selected': characterVisibility[char.code]}"
-							@click="characterVisibility[char.code] = !characterVisibility[char.code]"
-							:style="`border-color: ${char.color}`">
-							<img :src="`../assets/icons/${char.code}.png`" />
-							<div>
-								{{char.name}} ({{char.replayTotal}} game{{char.replayTotal === 1
-								? '' : 's'}})
-							</div>
+				<div>
+					<canvas
+						id="win-rate-chart"
+						class="chart"></canvas>
+					<div class="chart-controls">
+						<div>
+							Game Count:
+							<select v-model="gameDisplayCount">
+								<option
+									v-for="option in gameDisplayOptions"
+									:value="option.value">
+									{{option.text}}
+								</option>
+							</select>
 						</div>
+						<button
+							class="reset-zoom"
+							@click="resetZoom">
+							Reset Zoom
+						</button>
 					</div>
 				</div>
 			</div>

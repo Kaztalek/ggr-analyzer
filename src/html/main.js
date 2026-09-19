@@ -31,6 +31,8 @@ const CHARACTERS = {
 };
 const CHARACTER_DATA = Object.values(CHARACTERS);
 
+const ALL_CHAR_KEY = 'All characters';
+
 const getCharacterData = () => {
 	const charReplayTotals = {};
 	CHARACTER_DATA.forEach((char) => (charReplayTotals[char.code] = 0));
@@ -63,7 +65,7 @@ const filterDatasets = (datasets, filterFn) =>
 const datasets = [
 	{
 		data: replayData,
-		label: 'All characters',
+		label: ALL_CHAR_KEY,
 		borderColor: '#7bedd4',
 		backgroundColor: '#7bedd4cc' // TODO redundant code
 	},
@@ -110,7 +112,7 @@ createApp({
 		};
 		const characterData = ref(getCharacterData());
 		const characterVisibility = ref({
-			'All characters': true, // TODO clean up
+			[ALL_CHAR_KEY]: true,
 			...Object.fromEntries(Object.keys(CHARACTERS).map((key) => [key, false]))
 		});
 		const totalReplays = ref(replayData.length);
@@ -123,7 +125,7 @@ createApp({
 		]);
 
 		onMounted(() => {
-			chart = new Chart(document.getElementById('chart'), {
+			chart = new Chart(document.getElementById('win-rate-chart'), {
 				type: 'line',
 				options: {
 					scales: {
@@ -214,7 +216,10 @@ createApp({
 					chart.data.datasets = filterDatasets(datasets, (data) =>
 						data.slice(-newValue)
 					);
-					chart.options.scales.x.title.text = `Last ${newValue} games`;
+					chart.options.scales.x.title.text =
+						newValue === totalReplays.value
+							? 'All games'
+							: `Last ${newValue} games`;
 					chart.update();
 					syncChart(characterVisibility.value);
 				},
@@ -222,7 +227,6 @@ createApp({
 			);
 
 			// toggle visibility of character
-			// TODO toggle "all" as well
 			watch(
 				characterVisibility,
 				(newValue) => {
@@ -233,6 +237,7 @@ createApp({
 		});
 
 		return {
+			ALL_CHAR_KEY: ref(ALL_CHAR_KEY),
 			characterData,
 			characterVisibility,
 			gameDisplayCount,
