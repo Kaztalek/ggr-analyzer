@@ -32,6 +32,7 @@ const CHARACTERS = {
 const CHARACTER_DATA = Object.values(CHARACTERS);
 
 const ALL_CHAR_KEY = 'All characters';
+const replayData = window.replayData || [];
 
 const getCharacterData = () => {
 	const charReplayTotals = {};
@@ -67,7 +68,7 @@ const datasets = [
 		data: replayData,
 		label: ALL_CHAR_KEY,
 		borderColor: '#7bedd4',
-		backgroundColor: '#7bedd4cc' // TODO redundant code
+		backgroundColor: '#7bedd4cc'
 	},
 	...Object.values(
 		replayData.reduce((charSets, replay) => {
@@ -128,6 +129,7 @@ createApp({
 			chart = new Chart(document.getElementById('win-rate-chart'), {
 				type: 'line',
 				options: {
+					maintainAspectRatio: false,
 					scales: {
 						x: {
 							type: 'linear',
@@ -247,5 +249,3 @@ createApp({
 		};
 	}
 }).mount('#app');
-
-// TODO handle case where replayData doesn't exist

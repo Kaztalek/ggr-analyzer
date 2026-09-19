@@ -7,7 +7,7 @@ html {
 }
 
 body {
-	margin: 0;
+	margin: 16px;
 }
 
 button {
@@ -28,15 +28,16 @@ button:focus {
 #content {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
-	margin: 16px auto;
+	margin: auto;
 	max-width: 1500px;
+	max-height: calc(100vh - 48px);
 }
 
 .legend {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 4px;
+	margin-bottom: 16px;
 }
 
 .character-selector {
@@ -55,8 +56,16 @@ button:focus {
 	background-color: #c7f2ea;
 }
 
+.chart-container {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+}
+
 .chart {
 	background-color: #fff;
+	width: 100% !important;
+	height: 100% !important;
 }
 
 .chart-controls {

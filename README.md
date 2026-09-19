@@ -20,6 +20,7 @@ bun .
 ```
 
 #### Output
+- `reports/chart.html`: Open this in your browser for an interactive chart! See [Chart](#interactive-chart) section for more details.
 - `reports/character-distribution.csv`: Tracks how many unique opponents you've faced for each character, and your win rate against them
 - `reports/opponent-distribution.csv`: Tracks your win rate against unique opponents
 - `reports/head-to-head_<opponent name>.csv`: Tracks stats for each character matchup against the opponent specified in `.env`
@@ -29,3 +30,7 @@ Print stats on an individual replay file:
 ```bash
 bun . path/to/replay.ggr
 ```
+
+## Interactive Chart
+`reports/chart.html` is an interactive chart that you can open in your browser. It works offline, but needs JavaScript enabled. Since it relies on data generated from this project, you need to run the script (see [Running](#running)) to seed the data.
+![Screenshot of chart](assets/chart-screenshot.png)

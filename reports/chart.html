@@ -36,27 +36,32 @@
 						<div>{{char.name}} ({{char.replayTotal}})</div>
 					</button>
 				</div>
-				<div>
+				<div v-if="!totalReplays">
+					No replays found!
+					<br />
+					See README.md for instructions on setting up and generating reports.
+				</div>
+				<div v-show="totalReplays" class="chart-container">
 					<canvas
 						id="win-rate-chart"
 						class="chart"></canvas>
-					<div class="chart-controls">
-						<div>
-							Game Count:
-							<select v-model="gameDisplayCount">
-								<option
-									v-for="option in gameDisplayOptions"
-									:value="option.value">
-									{{option.text}}
-								</option>
-							</select>
-						</div>
-						<button
-							class="reset-zoom"
-							@click="resetZoom">
-							Reset Zoom
-						</button>
+				</div>
+				<div class="chart-controls">
+					<div>
+						Game Count:
+						<select v-model="gameDisplayCount">
+							<option
+								v-for="option in gameDisplayOptions"
+								:value="option.value">
+								{{option.text}}
+							</option>
+						</select>
 					</div>
+					<button
+						class="reset-zoom"
+						@click="resetZoom">
+						Reset Zoom
+					</button>
 				</div>
 			</div>
 		</div>
