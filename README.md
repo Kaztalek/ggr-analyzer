@@ -23,7 +23,7 @@ bun .
 - `reports/chart.html`: Open this in your browser for an interactive chart! See [Chart](#interactive-chart) section for more details.
 - `reports/character-distribution.csv`: Tracks how many unique opponents you've faced for each character, and your win rate against them
 - `reports/opponent-distribution.csv`: Tracks your win rate against unique opponents
-- `reports/head-to-head_<opponent name>.csv`: Tracks stats for each character matchup against the opponent specified in `.env`
+- `reports/head-to-head_<opponent name>.csv`: Tracks stats for each character matchup against the opponent(s) specified in `.env`
 
 ### Individual replay
 Print stats on an individual replay file:

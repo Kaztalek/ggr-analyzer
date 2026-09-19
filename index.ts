@@ -1,3 +1,4 @@
+import {envToArray} from './src/utils';
 import {generateReports} from './src/reports';
 import {readAllReplays, readReplayData} from './src/replayUtils';
 
@@ -13,7 +14,7 @@ const main = async () => {
 		return;
 	}
 	// read replay data from directories specified in .env
-	const replayPaths = process.env.REPLAY_PATHS?.split(',');
+	const replayPaths = envToArray(process.env.REPLAY_PATHS);
 	if (!Array.isArray(replayPaths)) {
 		throw new Error('REPLAY_PATHS not specified. update .env');
 	}
