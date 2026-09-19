@@ -15,7 +15,7 @@ const main = async () => {
 	}
 	// read replay data from directories specified in .env
 	const replayPaths = envToArray(process.env.REPLAY_PATHS);
-	if (!Array.isArray(replayPaths)) {
+	if (!replayPaths) {
 		throw new Error('REPLAY_PATHS not specified. update .env');
 	}
 	const replays = await readAllReplays(replayPaths);

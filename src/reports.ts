@@ -216,7 +216,9 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 				['Total Matches']: stats.total,
 				Wins: stats.wins,
 				// prefer not appending % to the end so numbers are naturally right-aligned, for easier reading
-				['Win Rate (%)']: ((stats.wins / stats.total) * 100).toFixed(1),
+				['Win Rate (%)']: stats.total
+					? ((stats.wins / stats.total) * 100).toFixed(1)
+					: '—',
 				['Matches Played As']: stats.yours
 			});
 		});
