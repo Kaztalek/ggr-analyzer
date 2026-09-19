@@ -41,12 +41,16 @@
 					<br />
 					See README.md for instructions on setting up and generating reports.
 				</div>
-				<div v-show="totalReplays" class="chart-container">
+				<div
+					v-show="totalReplays"
+					class="chart-container">
 					<canvas
 						id="win-rate-chart"
 						class="chart"></canvas>
 				</div>
-				<div class="chart-controls">
+				<div
+					v-show="totalReplays"
+					class="chart-controls">
 					<div>
 						Game Count:
 						<select v-model="gameDisplayCount">
