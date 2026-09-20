@@ -173,13 +173,105 @@ createApp({
 							display: false
 						},
 						tooltip: {
-							callbacks: {
-								title: (items) =>
-									moment(items[0].dataset.data[items[0].dataIndex].date).format(
-										'YYYY-MM-DD HH:mm:ss'
-									),
-								label: (context) =>
-									`${CHARACTERS[context.raw.charCode]?.name ?? context.raw.charCode}: ${context.formattedValue}%`
+							enabled: false,
+							external: (context) => {
+								// custom tooltip based on example from Chart.js documentation https://www.chartjs.org/docs/latest/configuration/tooltip.html#external-custom-tooltips
+								let tooltipEl = document.getElementById(
+									'win-rate-chart-tooltip'
+								);
+
+								if (!tooltipEl) {
+									tooltipEl = document.createElement('div');
+									tooltipEl.id = 'win-rate-chart-tooltip';
+									document.body.appendChild(tooltipEl);
+								}
+
+								const tooltipModel = context.tooltip;
+								// hide if no tooltip
+								if (tooltipModel.opacity === 0) {
+									tooltipEl.style.opacity = 0;
+									return;
+								}
+
+								if (tooltipModel.body) {
+									const {x: xVal, y: yVal} =
+										context.tooltip.dataPoints[0].parsed;
+									let innerHtml = `
+									<div style="display: flex; flex-direction: column; gap: 8px">
+										<div>
+											<div>Game ${xVal}</div>
+											<div>Win Rate: <b>${yVal}%</b></div>
+										</div>
+									`;
+
+									context.tooltip.dataPoints.forEach((dataPoint, i) => {
+										const renderResultsRow = (
+											name,
+											char,
+											roundsWon,
+											didWin,
+											isP1 = false
+										) => `
+										<div style="display: flex; align-items: center; gap: 4px; width: 200px; background-color: #fff; border: 2px solid ${dataPoint.dataset.borderColor}; ${isP1 ? 'border-bottom: 0;' : ''}">
+											<span style="flex-grow: 1; padding: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden">${name}</span>
+											<img src="../assets/icons/${char.code}.png" style="height: 24px; opacity: ${didWin ? 1 : 0.5}" />
+											<span style="font-weight: bold; background-color: ${didWin ? '#23bc3d' : '#666'}; color: #fff; padding: 4px">${roundsWon}</span>
+										</div>
+										`;
+
+										const {
+											date,
+											p1Char,
+											p1Name,
+											p1RoundsWon,
+											p2Char,
+											p2Name,
+											p2RoundsWon,
+											winner
+										} = dataPoint.raw;
+
+										innerHtml = `${innerHtml}
+										<div style="display: flex; flex-direction: column">
+											${renderResultsRow(p1Name, p1Char, p1RoundsWon, winner === 'P1', true)}
+											${renderResultsRow(p2Name, p2Char, p2RoundsWon, winner === 'P2')}
+											<div style="align-self: flex-end; font-size: 12px; font-weight: bold">${moment(date).format('YYYY-MM-DD HH:mm:ss')}</div>
+										</div>`;
+									});
+
+									tooltipEl.innerHTML = `${innerHtml}</div>`;
+								}
+
+								const canvasRect = context.chart.canvas.getBoundingClientRect();
+								let tooltipWidth = tooltipEl.offsetWidth;
+								// on initial load, the tooltip width seems to be overly large before it's rendered
+								// lazy fix is to just ignore tooltip width in this case, since it'll fix itself once rendered
+								if (tooltipWidth > 1000) {
+									tooltipWidth = 0;
+								}
+								let leftPos =
+									canvasRect.left + window.pageXOffset + tooltipModel.caretX;
+								// position tooltip to the left if it would overflow canvas to the right
+								if (leftPos + tooltipWidth > canvasRect.right) {
+									leftPos -= tooltipWidth;
+								}
+								let topPos =
+									canvasRect.top + window.pageYOffset + tooltipModel.caretY;
+								// position tooltip to the top if it's below the midpoint of the chart
+								if (canvasRect.height / 2 < tooltipModel.caretY) {
+									topPos -= tooltipEl.offsetHeight;
+								}
+								Object.assign(tooltipEl.style, {
+									opacity: 1,
+									position: 'absolute',
+									fontSize: '14px',
+									left: `${leftPos}px`,
+									top: `${topPos}px`,
+									padding: '4px',
+									pointerEvents: 'none',
+									backgroundColor: '#fcfcfc',
+									color: '#000',
+									border: '1px solid #999'
+								});
 							}
 						},
 						zoom: {

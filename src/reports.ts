@@ -12,9 +12,8 @@ const CHAR_DIST_REPORT_ENABLED = true;
 const OPP_DIST_REPORT_ENABLED = true;
 const H2H_REPORT_ENABLED = !!OPP_STEAM_IDS;
 
-type allReplayDataType = {
+type allReplayDataType = ggrReplayType & {
 	charCode: (typeof CHARACTERS)[number]['code'];
-	date: Date;
 	didWin: boolean;
 	oppCharCode: (typeof CHARACTERS)[number]['code'];
 };
@@ -125,8 +124,8 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 
 		if (HTML_REPORT_ENABLED) {
 			allData.push({
+				...replay,
 				charCode,
-				date: replay.date,
 				didWin,
 				oppCharCode
 			});

@@ -1,6 +1,7 @@
 node_modules
 tsconfig.tsbuildinfo
 .env
+old-*.png
 src/html/replayData.js
 *.csv*
 *.ggr
