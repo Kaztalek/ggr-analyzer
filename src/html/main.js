@@ -360,7 +360,9 @@ app.component('Dropdown', {
 	emits: ['update:modelValue'],
 	setup(props, {emit}) {
 		const dropdown = ref(null);
+		const dropdownSelector = ref(null);
 		const isOpen = ref(false);
+		const highlightedIndex = ref(0);
 
 		const selectedOption = computed(() =>
 			props.options.find((option) => option.value === props.modelValue)
@@ -371,9 +373,37 @@ app.component('Dropdown', {
 			isOpen.value = false;
 		};
 
+		const moveIndex = (amount) => {
+			const newValue = highlightedIndex.value + amount;
+			if (newValue >= 0 && newValue < props.options.length) {
+				highlightedIndex.value = newValue;
+			}
+		};
+
 		const handleClickOutside = (e) => {
 			if (!dropdown.value?.contains(e.target)) {
 				isOpen.value = false;
+			}
+		};
+
+		const handleKeydown = (e) => {
+			switch (e.key) {
+				case 'ArrowUp':
+					moveIndex(-1);
+					break;
+				case 'ArrowDown':
+					moveIndex(1);
+					break;
+				case 'Enter':
+					const option = props.options[highlightedIndex.value];
+					if (option && isOpen.value) {
+						e.preventDefault();
+						selectOption(option);
+					}
+					break;
+				case 'Escape':
+					isOpen.value = false;
+					break;
 			}
 		};
 
@@ -387,6 +417,8 @@ app.component('Dropdown', {
 
 		return {
 			dropdown,
+			handleKeydown,
+			highlightedIndex,
 			isOpen,
 			selectedOption,
 			selectOption
@@ -394,16 +426,22 @@ app.component('Dropdown', {
 	},
 	template: `
 	<div ref="dropdown" class="dropdown">
-		<div class="dropdown-selector" @click="isOpen = !isOpen">
+		<button
+			ref="dropdownSelector"
+			role="combobox"
+			class="dropdown-selector"
+			@click="isOpen = !isOpen"
+			@keydown="handleKeydown">
 			<span>{{selectedOption?.text || placeholder}}</span>
 			<span class="dropdown-caret">▼</span>
-		</div>
-		<div v-if="isOpen" class="dropdown-list">
+		</button>
+		<div v-if="isOpen" role="listbox" class="dropdown-list">
 			<div
-				v-for="option in options"
+				v-for="(option, i) in options"
 				:key="option.value"
+				role="option"
 				class="dropdown-option"
-				:class="{selected: option.value === modelValue}"
+				:class="{selected: option.value === modelValue, highlighted: i === highlightedIndex}"
 				@click="selectOption(option)">
 				<img
 					v-if="option.image"
