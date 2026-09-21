@@ -1,4 +1,4 @@
-const {createApp, onMounted, ref, watch} = Vue;
+const {computed, createApp, onBeforeUnmount, onMounted, ref, watch} = Vue;
 
 // dominant color gotten from parsing icons here: https://lokeshdhakar.com/projects/color-thief/
 // used 2nd dominant color for Sol to differentiate SO and OR
@@ -106,7 +106,7 @@ const syncChart = (characterVisibility) => {
 	});
 };
 
-createApp({
+const app = createApp({
 	setup() {
 		const resetZoom = () => {
 			chart.resetZoom();
@@ -117,13 +117,13 @@ createApp({
 			...Object.fromEntries(Object.keys(CHARACTERS).map((key) => [key, false]))
 		});
 		const totalReplays = ref(replayData.length);
-		const gameDisplayCount = ref(100);
 		const gameDisplayOptions = ref([
 			{text: 100, value: 100},
 			{text: 500, value: 500},
 			{text: 1000, value: 1000},
 			{text: `All (${replayData.length})`, value: replayData.length}
 		]);
+		const gameDisplayCount = ref(gameDisplayOptions.value[0].value);
 
 		onMounted(() => {
 			chart = new Chart(document.getElementById('win-rate-chart'), {
@@ -340,4 +340,82 @@ createApp({
 			totalReplays
 		};
 	}
-}).mount('#app');
+});
+
+app.component('Dropdown', {
+	props: {
+		modelValue: {
+			type: [Number, String],
+			default: ''
+		},
+		options: {
+			type: Array,
+			required: true
+		},
+		placeholder: {
+			type: String,
+			default: ''
+		}
+	},
+	emits: ['update:modelValue'],
+	setup(props, {emit}) {
+		const dropdown = ref(null);
+		const isOpen = ref(false);
+
+		const selectedOption = computed(() =>
+			props.options.find((option) => option.value === props.modelValue)
+		);
+
+		const selectOption = (option) => {
+			emit('update:modelValue', option.value);
+			isOpen.value = false;
+		};
+
+		const handleClickOutside = (e) => {
+			if (!dropdown.value?.contains(e.target)) {
+				isOpen.value = false;
+			}
+		};
+
+		onMounted(() => {
+			document.addEventListener('click', handleClickOutside);
+		});
+
+		onBeforeUnmount(() => {
+			document.removeEventListener('click', handleClickOutside);
+		});
+
+		return {
+			dropdown,
+			isOpen,
+			selectedOption,
+			selectOption
+		};
+	},
+	template: `
+	<div ref="dropdown" class="dropdown">
+		<div class="dropdown-selector" @click="isOpen = !isOpen">
+			<span>{{selectedOption?.text || placeholder}}</span>
+			<span class="dropdown-caret">▼</span>
+		</div>
+		<div v-if="isOpen" class="dropdown-list">
+			<div
+				v-for="option in options"
+				:key="option.value"
+				class="dropdown-option"
+				:class="{selected: option.value === modelValue}"
+				@click="selectOption(option)">
+				<img
+					v-if="option.image"
+					:src="option.image"
+					:alt="option.text"
+					class="dropdown-option-image"
+				/>
+				{{option.text}}
+			</div>
+		</div>
+	</div>
+	`
+});
+
+app.mount('#app');

@@ -22,14 +22,14 @@
 				<div class="legend">
 					<button
 						class="character-selector"
-						:class="{'character-selector--selected': characterVisibility[ALL_CHAR_KEY]}"
+						:class="{selected: characterVisibility[ALL_CHAR_KEY]}"
 						@click="characterVisibility[ALL_CHAR_KEY] = !characterVisibility[ALL_CHAR_KEY]">
 						All ({{totalReplays}} games)
 					</button>
 					<button
 						v-for="char in characterData"
 						class="character-selector"
-						:class="{'character-selector--selected': characterVisibility[char.code]}"
+						:class="{selected: characterVisibility[char.code]}"
 						@click="characterVisibility[char.code] = !characterVisibility[char.code]"
 						:style="`border-color: ${char.color}`">
 						<img :src="`../assets/icons/${char.code}.png`" />
@@ -53,13 +53,9 @@
 					class="chart-controls">
 					<div>
 						Game Count:
-						<select v-model="gameDisplayCount">
-							<option
-								v-for="option in gameDisplayOptions"
-								:value="option.value">
-								{{option.text}}
-							</option>
-						</select>
+						<Dropdown
+							v-model="gameDisplayCount"
+							:options="gameDisplayOptions" />
 					</div>
 					<button
 						class="reset-zoom"
