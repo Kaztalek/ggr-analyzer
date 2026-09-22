@@ -25,6 +25,9 @@ button:focus {
 	outline: 1px solid #000;
 }
 
+.dropdown-label {
+	font-size: 12px;
+}
 .dropdown {
 	position: relative;
 }

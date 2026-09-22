@@ -344,6 +344,10 @@ const app = createApp({
 
 app.component('Dropdown', {
 	props: {
+		label: {
+			type: String,
+			default: ''
+		},
 		modelValue: {
 			type: [Number, String],
 			default: ''
@@ -425,6 +429,7 @@ app.component('Dropdown', {
 		};
 	},
 	template: `
+	<span v-if="label" class="dropdown-label">{{label}}</span>
 	<div ref="dropdown" class="dropdown">
 		<button
 			ref="dropdownSelector"
