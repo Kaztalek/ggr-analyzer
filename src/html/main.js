@@ -124,6 +124,15 @@ const app = createApp({
 			{text: `All (${replayData.length})`, value: replayData.length}
 		]);
 		const gameDisplayCount = ref(gameDisplayOptions.value[0].value);
+		const oppCharOptions = ref([
+			{text: 'All', value: ''},
+			...Object.keys(CHARACTERS).map((key) => ({
+				image: `../assets/icons/${CHARACTERS[key].code}.png`,
+				text: CHARACTERS[key].name,
+				value: CHARACTERS[key].code
+			}))
+		]);
+		const oppCharCode = ref(oppCharOptions.value[0].value);
 
 		onMounted(() => {
 			chart = new Chart(document.getElementById('win-rate-chart'), {
@@ -336,6 +345,8 @@ const app = createApp({
 			characterVisibility,
 			gameDisplayCount,
 			gameDisplayOptions,
+			oppCharCode,
+			oppCharOptions,
 			resetZoom,
 			totalReplays
 		};
@@ -364,7 +375,6 @@ app.component('Dropdown', {
 	emits: ['update:modelValue'],
 	setup(props, {emit}) {
 		const dropdown = ref(null);
-		const dropdownSelector = ref(null);
 		const isOpen = ref(false);
 		const highlightedIndex = ref(0);
 
@@ -432,11 +442,15 @@ app.component('Dropdown', {
 	<span v-if="label" class="dropdown-label">{{label}}</span>
 	<div ref="dropdown" class="dropdown">
 		<button
-			ref="dropdownSelector"
 			role="combobox"
 			class="dropdown-selector"
+			:class="{'has-image': !!selectedOption.image}"
 			@click="isOpen = !isOpen"
 			@keydown="handleKeydown">
+			<img
+				v-if="selectedOption.image"
+				:src="selectedOption.image"
+			/>
 			<span>{{selectedOption?.text || placeholder}}</span>
 			<span class="dropdown-caret">▼</span>
 		</button>
@@ -446,13 +460,12 @@ app.component('Dropdown', {
 				:key="option.value"
 				role="option"
 				class="dropdown-option"
-				:class="{selected: option.value === modelValue, highlighted: i === highlightedIndex}"
+				:class="{selected: option.value === modelValue, highlighted: i === highlightedIndex, 'has-image': !!option.image}"
 				@click="selectOption(option)">
 				<img
 					v-if="option.image"
 					:src="option.image"
 					:alt="option.text"
-					class="dropdown-option-image"
 				/>
 				{{option.text}}
 			</div>

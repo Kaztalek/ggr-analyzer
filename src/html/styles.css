@@ -25,47 +25,6 @@ button:focus {
 	outline: 1px solid #000;
 }
 
-.dropdown-label {
-	font-size: 12px;
-}
-.dropdown {
-	position: relative;
-}
-.dropdown-selector {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	min-width: 100px;
-}
-.dropdown-selector:hover {
-	background-color: #ccc;
-}
-.dropdown-caret {
-	font-size: 10px;
-	color: #555;
-}
-.dropdown-list {
-	position: absolute;
-	top: calc(100% + 4px);
-	left: 0;
-	right: 0;
-	background-color: #fff;
-	border: 1px solid #ccc;
-	box-shadow: 0 4px 6px #00000022;
-	z-index: 100;
-}
-.dropdown-option {
-	padding: 4px;
-	cursor: pointer;
-}
-.dropdown-option:hover,
-.dropdown-option.highlighted {
-	background-color: #f0f0f0;
-}
-.dropdown-option.selected {
-	background-color: #c7f2ea;
-}
-
 #content {
 	display: flex;
 	flex-direction: column;
