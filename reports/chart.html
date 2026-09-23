@@ -54,16 +54,16 @@
 				<div
 					v-show="totalReplays"
 					class="chart-controls">
-					<div>
-						<Dropdown
-							v-model="gameDisplayCount"
-							label="Game Count"
-							:options="gameDisplayOptions" />
-						<!-- <Dropdown
-							v-model="oppCharCode"
-							label="Opponent Character"
-							:options="oppCharOptions" /> -->
-					</div>
+					<Dropdown
+						v-model="gameDisplayCount"
+						label="Game Count"
+						:options="gameDisplayOptions">
+					</Dropdown>
+					<!-- <Dropdown
+						v-model="oppCharCode"
+						label="Opponent Character"
+						:options="oppCharOptions">
+					</Dropdown> -->
 					<button
 						class="reset-zoom"
 						@click="resetZoom">

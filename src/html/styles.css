@@ -48,7 +48,9 @@ button:focus {
 	border: 3px solid;
 	cursor: pointer;
 }
-
+.character-selector > img {
+	height: 24px;
+}
 .character-selector.selected {
 	background-color: #c7f2ea;
 }
@@ -69,7 +71,7 @@ button:focus {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 4px;
+	gap: 8px;
 }
 
 .reset-zoom {
