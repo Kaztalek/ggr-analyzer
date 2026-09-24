@@ -31,6 +31,7 @@
 					</button>
 					<button
 						v-for="char in characterData"
+						:key="char.code"
 						class="character-selector"
 						:class="{selected: characterVisibility[char.code]}"
 						@click="characterVisibility[char.code] = !characterVisibility[char.code]"
@@ -39,20 +40,20 @@
 						<div>{{char.name}} ({{char.replayTotal}})</div>
 					</button>
 				</div>
-				<div v-if="!totalReplays">
+				<div v-if="!isSeeded">
 					No replays found!
 					<br />
 					See README.md for instructions on setting up and generating reports.
 				</div>
 				<div
-					v-show="totalReplays"
+					v-show="isSeeded"
 					class="chart-container">
 					<canvas
 						id="win-rate-chart"
 						class="chart"></canvas>
 				</div>
 				<div
-					v-show="totalReplays"
+					v-show="isSeeded"
 					class="chart-controls">
 					<Dropdown
 						v-model="gameDisplayCount"

@@ -34,16 +34,6 @@ const CHARACTER_DATA = Object.values(CHARACTERS);
 const ALL_CHAR_KEY = 'All characters';
 const replayData = window.replayData || [];
 
-const getCharacterData = () => {
-	const charReplayTotals = {};
-	CHARACTER_DATA.forEach((char) => (charReplayTotals[char.code] = 0));
-	replayData.forEach((replay) => (charReplayTotals[replay.charCode] += 1));
-	return CHARACTER_DATA.map((char) => ({
-		...char,
-		replayTotal: charReplayTotals[char.code]
-	})).sort((a, b) => b.replayTotal - a.replayTotal);
-};
-
 const datasets = [
 	{
 		data: replayData,
@@ -67,28 +57,22 @@ const datasets = [
 		}, {})
 	).sort((a, b) => b.data.length - a.data.length)
 ];
+let filteredDatasets = datasets;
 
 // Chart.js object
 let chart;
 
-// keep chart updates in sync with our Vue data
-const syncChart = (characterVisibility) => {
-	datasets.forEach((dataset, i) => {
-		if (characterVisibility[dataset.label] !== chart.isDatasetVisible(i)) {
-			// click legend directly to keep animations
-			// otherwise, use chart.setDataVisibility and chart.update
-			chart.options.plugins.legend.onClick.call(
-				chart,
-				null,
-				{datasetIndex: i},
-				chart.legend
-			);
-		}
-	});
-};
-
 const app = createApp({
 	setup() {
+		const getCharacterData = () =>
+			CHARACTER_DATA.map((char) => ({
+				...char,
+				replayTotal:
+					filteredDatasets.find((dataset) => dataset.label === char.code)?.data
+						?.length ?? 0
+			})).sort((a, b) => b.replayTotal - a.replayTotal);
+		const getTotalReplays = () => filteredDatasets[0].data.length;
+
 		const resetZoom = () => {
 			chart.resetZoom();
 		};
@@ -97,12 +81,12 @@ const app = createApp({
 			[ALL_CHAR_KEY]: true,
 			...Object.fromEntries(Object.keys(CHARACTERS).map((key) => [key, false]))
 		});
-		const totalReplays = ref(replayData.length);
-		const gameDisplayOptions = ref([
+		const totalReplays = ref(getTotalReplays());
+		const gameDisplayOptions = computed(() => [
 			{text: 100, value: 100},
 			{text: 500, value: 500},
 			{text: 1000, value: 1000},
-			{text: `All (${replayData.length})`, value: replayData.length}
+			{text: `All (${totalReplays.value})`, value: ''}
 		]);
 		const gameDisplayCount = ref(gameDisplayOptions.value[0].value);
 		const oppCharOptions = ref([
@@ -123,27 +107,61 @@ const app = createApp({
 			(replay) => !oppCharCode.value || replay.oppCharCode === oppCharCode.value
 		];
 
-		const filterDatasets = () =>
-			datasets.map((dataset) => {
+		// apply filters to the data and recalculate game totals
+		const filterDatasets = () => {
+			filteredDatasets = datasets.map((dataset) => ({
+				...dataset,
+				data: dataset.data.filter((replay) =>
+					chartFilters.every((filter) => filter(replay))
+				)
+			}));
+			processChartData();
+			// update character data with new totals
+			characterData.value = getCharacterData();
+			totalReplays.value = getTotalReplays();
+		};
+
+		// process datasets separately from filtering, so that slicing the last n games doesn't affect game totals
+		const processChartData = () => {
+			chart.data.datasets = filteredDatasets.map((dataset) => {
 				let wins = 0;
+				const data = gameDisplayCount.value
+					? dataset.data.slice(-gameDisplayCount.value)
+					: dataset.data;
 
 				return {
 					...dataset,
-					data: dataset.data
-						.filter((replay) => chartFilters.every((filter) => filter(replay)))
-						.slice(-gameDisplayCount.value)
-						.map((replay, i) => {
-							if (replay.didWin) {
-								wins += 1;
-							}
-							return {
-								...replay,
-								x: i + 1,
-								y: ((wins / (i + 1)) * 100).toFixed(1)
-							};
-						})
+					data: data.map((replay, i) => {
+						if (replay.didWin) {
+							wins += 1;
+						}
+						return {
+							...replay,
+							x: i + 1,
+							y: ((wins / (i + 1)) * 100).toFixed(1)
+						};
+					})
 				};
 			});
+		};
+
+		// keep chart updates in sync with our Vue data
+		const syncChart = () => {
+			datasets.forEach((dataset, i) => {
+				if (
+					characterVisibility.value[dataset.label] !== chart.isDatasetVisible(i)
+				) {
+					// click legend directly to keep animations
+					// otherwise, use chart.setDataVisibility and chart.update
+					chart.options.plugins.legend.onClick.call(
+						chart,
+						null,
+						{datasetIndex: i},
+						chart.legend
+					);
+				}
+			});
+		};
 
 		onMounted(() => {
 			chart = new Chart(document.getElementById('win-rate-chart'), {
@@ -331,13 +349,12 @@ const app = createApp({
 			watch(
 				gameDisplayCount,
 				(newValue) => {
-					chart.data.datasets = filterDatasets();
-					chart.options.scales.x.title.text =
-						newValue === totalReplays.value
-							? 'All games'
-							: `Last ${newValue} games`;
+					filterDatasets();
+					chart.options.scales.x.title.text = newValue
+						? `Last ${newValue} games`
+						: 'All games';
 					chart.update();
-					syncChart(characterVisibility.value);
+					syncChart();
 				},
 				{immediate: true}
 			);
@@ -345,16 +362,16 @@ const app = createApp({
 			// filter by opponent character
 			watch(oppCharCode, () => {
 				chart.options.plugins.title.text = getChartTitle();
-				chart.data.datasets = filterDatasets();
+				filterDatasets();
 				chart.update();
-				syncChart(characterVisibility.value);
+				syncChart();
 			});
 
 			// toggle visibility of character
 			watch(
 				characterVisibility,
-				(newValue) => {
-					syncChart(newValue);
+				() => {
+					syncChart();
 				},
 				{deep: true}
 			);
@@ -366,6 +383,7 @@ const app = createApp({
 			characterVisibility,
 			gameDisplayCount,
 			gameDisplayOptions,
+			isSeeded: ref(!!replayData.length),
 			oppCharCode,
 			oppCharOptions,
 			resetZoom,
