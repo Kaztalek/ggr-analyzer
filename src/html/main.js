@@ -44,25 +44,6 @@ const getCharacterData = () => {
 	})).sort((a, b) => b.replayTotal - a.replayTotal);
 };
 
-const filterDatasets = (datasets, filterFn) =>
-	datasets.map((dataset) => {
-		let wins = 0;
-
-		return {
-			...dataset,
-			data: filterFn(dataset.data).map((replay, i) => {
-				if (replay.didWin) {
-					wins += 1;
-				}
-				return {
-					...replay,
-					x: i + 1,
-					y: ((wins / (i + 1)) * 100).toFixed(1)
-				};
-			})
-		};
-	});
-
 const datasets = [
 	{
 		data: replayData,
@@ -133,6 +114,33 @@ const app = createApp({
 			}))
 		]);
 		const oppCharCode = ref(oppCharOptions.value[0].value);
+
+		const chartFilters = [
+			// filter by opponent character
+			(replay) => !oppCharCode.value || replay.oppCharCode === oppCharCode.value
+		];
+
+		const filterDatasets = () =>
+			datasets.map((dataset) => {
+				let wins = 0;
+
+				return {
+					...dataset,
+					data: dataset.data
+						.filter((replay) => chartFilters.every((filter) => filter(replay)))
+						.slice(-gameDisplayCount.value)
+						.map((replay, i) => {
+							if (replay.didWin) {
+								wins += 1;
+							}
+							return {
+								...replay,
+								x: i + 1,
+								y: ((wins / (i + 1)) * 100).toFixed(1)
+							};
+						})
+				};
+			});
 
 		onMounted(() => {
 			chart = new Chart(document.getElementById('win-rate-chart'), {
@@ -316,9 +324,7 @@ const app = createApp({
 			watch(
 				gameDisplayCount,
 				(newValue) => {
-					chart.data.datasets = filterDatasets(datasets, (data) =>
-						data.slice(-newValue)
-					);
+					chart.data.datasets = filterDatasets();
 					chart.options.scales.x.title.text =
 						newValue === totalReplays.value
 							? 'All games'
@@ -330,16 +336,11 @@ const app = createApp({
 			);
 
 			// filter by opponent character
-			watch(
-				oppCharCode,
-				(newValue) => {
-					chart.data.datasets = filterDatasets(datasets, (data) =>
-						data.filter(x => x.oppCharCode === newValue)
-					);
-					chart.update();
-					syncChart(characterVisibility.value);
-				}
-			);
+			watch(oppCharCode, () => {
+				chart.data.datasets = filterDatasets();
+				chart.update();
+				syncChart(characterVisibility.value);
+			});
 
 			// toggle visibility of character
 			watch(
