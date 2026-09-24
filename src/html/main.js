@@ -115,6 +115,9 @@ const app = createApp({
 		]);
 		const oppCharCode = ref(oppCharOptions.value[0].value);
 
+		const getChartTitle = () =>
+			`Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`;
+
 		const chartFilters = [
 			// filter by opponent character
 			(replay) => !oppCharCode.value || replay.oppCharCode === oppCharCode.value
@@ -188,6 +191,10 @@ const app = createApp({
 					plugins: {
 						legend: {
 							display: false
+						},
+						title: {
+							display: true,
+							text: getChartTitle()
 						},
 						tooltip: {
 							enabled: false,
@@ -337,6 +344,7 @@ const app = createApp({
 
 			// filter by opponent character
 			watch(oppCharCode, () => {
+				chart.options.plugins.title.text = getChartTitle();
 				chart.data.datasets = filterDatasets();
 				chart.update();
 				syncChart(characterVisibility.value);
