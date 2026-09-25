@@ -57,31 +57,41 @@ const datasets = [
 		}, {})
 	).sort((a, b) => b.data.length - a.data.length)
 ];
-let filteredDatasets = datasets;
 
 // Chart.js object
 let chart;
 
 const app = createApp({
 	setup() {
-		const getCharacterData = () =>
-			CHARACTER_DATA.map((char) => ({
-				...char,
-				replayTotal:
-					filteredDatasets.find((dataset) => dataset.label === char.code)?.data
-						?.length ?? 0
-			})).sort((a, b) => b.replayTotal - a.replayTotal);
-		const getTotalReplays = () => filteredDatasets[0].data.length;
-
+		const oppCharCode = ref('');
+		const chartFilters = ref([
+			// filter by opponent character
+			(replay) => !oppCharCode.value || replay.oppCharCode === oppCharCode.value
+		]);
+		const filteredDatasets = computed(() =>
+			datasets.map((dataset) => ({
+				...dataset,
+				data: dataset.data.filter((replay) =>
+					chartFilters.value.every((filter) => filter(replay))
+				)
+			}))
+		);
 		const resetZoom = () => {
 			chart.resetZoom();
 		};
-		const characterData = ref(getCharacterData());
+		const characterData = computed(() =>
+			CHARACTER_DATA.map((char) => ({
+				...char,
+				replayTotal:
+					filteredDatasets.value.find((dataset) => dataset.label === char.code)
+						?.data?.length ?? 0
+			})).sort((a, b) => b.replayTotal - a.replayTotal)
+		);
 		const characterVisibility = ref({
 			[ALL_CHAR_KEY]: true,
 			...Object.fromEntries(Object.keys(CHARACTERS).map((key) => [key, false]))
 		});
-		const totalReplays = ref(getTotalReplays());
+		const totalReplays = computed(() => filteredDatasets.value[0].data.length);
 		const gameDisplayOptions = computed(() => [
 			{text: 100, value: 100},
 			{text: 500, value: 500},
@@ -97,33 +107,13 @@ const app = createApp({
 				value: CHARACTERS[key].code
 			}))
 		]);
-		const oppCharCode = ref(oppCharOptions.value[0].value);
 
-		const getChartTitle = () =>
-			`Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`;
+		const updateChartTitle = () =>
+			chart.options.plugins.title.text = `Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`;
 
-		const chartFilters = [
-			// filter by opponent character
-			(replay) => !oppCharCode.value || replay.oppCharCode === oppCharCode.value
-		];
-
-		// apply filters to the data and recalculate game totals
-		const filterDatasets = () => {
-			filteredDatasets = datasets.map((dataset) => ({
-				...dataset,
-				data: dataset.data.filter((replay) =>
-					chartFilters.every((filter) => filter(replay))
-				)
-			}));
-			processChartData();
-			// update character data with new totals
-			characterData.value = getCharacterData();
-			totalReplays.value = getTotalReplays();
-		};
-
-		// process datasets separately from filtering, so that slicing the last n games doesn't affect game totals
-		const processChartData = () => {
-			chart.data.datasets = filteredDatasets.map((dataset) => {
+		// update datasets separately from filtering, so that slicing the last n games doesn't affect game totals
+		const updateChartData = () => {
+			chart.data.datasets = filteredDatasets.value.map((dataset) => {
 				let wins = 0;
 				const data = gameDisplayCount.value
 					? dataset.data.slice(-gameDisplayCount.value)
@@ -146,7 +136,7 @@ const app = createApp({
 		};
 
 		// keep chart updates in sync with our Vue data
-		const syncChart = () => {
+		const syncChartVisibility = () => {
 			datasets.forEach((dataset, i) => {
 				if (
 					characterVisibility.value[dataset.label] !== chart.isDatasetVisible(i)
@@ -211,8 +201,7 @@ const app = createApp({
 							display: false
 						},
 						title: {
-							display: true,
-							text: getChartTitle()
+							display: true
 						},
 						tooltip: {
 							enabled: false,
@@ -349,29 +338,30 @@ const app = createApp({
 			watch(
 				gameDisplayCount,
 				(newValue) => {
-					filterDatasets();
+					updateChartTitle();
+					updateChartData();
 					chart.options.scales.x.title.text = newValue
 						? `Last ${newValue} games`
 						: 'All games';
 					chart.update();
-					syncChart();
+					syncChartVisibility();
 				},
 				{immediate: true}
 			);
 
 			// filter by opponent character
 			watch(oppCharCode, () => {
-				chart.options.plugins.title.text = getChartTitle();
-				filterDatasets();
+				updateChartTitle();
+				updateChartData();
 				chart.update();
-				syncChart();
+				syncChartVisibility();
 			});
 
 			// toggle visibility of character
 			watch(
 				characterVisibility,
 				() => {
-					syncChart();
+					syncChartVisibility();
 				},
 				{deep: true}
 			);
