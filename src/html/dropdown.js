@@ -87,39 +87,39 @@ const Dropdown = {
 		};
 	},
 	template: `
-  <div>
-    <span v-if="label" class="dropdown-label">{{label}}</span>
-    <div ref="dropdown" class="dropdown">
-      <button
-        role="combobox"
-        class="dropdown-selector"
-        :class="{'has-image': !!selectedOption.image}"
-        @click="isOpen = !isOpen"
-        @keydown="handleKeydown">
-        <img
-          v-if="selectedOption.image"
-          :src="selectedOption.image"
-        />
-        <span>{{selectedOption?.text || placeholder}}</span>
-        <span class="dropdown-caret">▼</span>
-      </button>
-      <div v-if="isOpen" role="listbox" class="dropdown-list">
-        <div
-          v-for="(option, i) in options"
-          :key="option.value"
-          role="option"
-          class="dropdown-option"
-          :class="{selected: option.value === modelValue, highlighted: i === highlightedIndex, 'has-image': !!option.image}"
-          @click="selectOption(option, i)">
-          <img
-            v-if="option.image"
-            :src="option.image"
-            :alt="option.text"
-          />
-          {{option.text}}
-        </div>
-      </div>
-    </div>
-  </div>
-  `
+	<div>
+		<span v-if="label" class="dropdown-label">{{label}}</span>
+		<div ref="dropdown" class="dropdown">
+			<button
+				role="combobox"
+				class="dropdown-selector"
+				:class="{'has-image': !!selectedOption.image}"
+				@click="isOpen = !isOpen"
+				@keydown="handleKeydown">
+				<img
+					v-if="selectedOption.image"
+					:src="selectedOption.image"
+				/>
+				<span>{{selectedOption?.text || placeholder}}</span>
+				<span class="dropdown-caret">▼</span>
+			</button>
+			<div v-if="isOpen" role="listbox" class="dropdown-list">
+				<div
+					v-for="(option, i) in options"
+					:key="option.value"
+					role="option"
+					class="dropdown-option"
+					:class="{selected: option.value === modelValue, highlighted: i === highlightedIndex, 'has-image': !!option.image}"
+					@click="selectOption(option, i)">
+					<img
+						v-if="option.image"
+						:src="option.image"
+						:alt="option.text"
+					/>
+					{{option.text}}
+				</div>
+			</div>
+		</div>
+	</div>
+	`
 };

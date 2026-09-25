@@ -1,3 +1,13 @@
+if (!window.Vue) {
+	infoEl = document.createElement('div');
+	infoEl.innerHTML = `
+	Missing libraries!
+	<br />
+	See README.md for instructions on setting up and generating reports.
+	`;
+	document.body.appendChild(infoEl);
+}
+
 const {computed, createApp, onBeforeUnmount, onMounted, ref, watch} = Vue;
 
 // dominant color gotten from parsing icons here: https://lokeshdhakar.com/projects/color-thief/
@@ -109,7 +119,7 @@ const app = createApp({
 		]);
 
 		const updateChartTitle = () =>
-			chart.options.plugins.title.text = `Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`;
+			(chart.options.plugins.title.text = `Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`);
 
 		// update datasets separately from filtering, so that slicing the last n games doesn't affect game totals
 		const updateChartData = () => {
