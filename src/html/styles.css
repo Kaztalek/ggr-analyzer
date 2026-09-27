@@ -1,3 +1,8 @@
+:root {
+	--selected-color: #c7f2ea;
+	--dropdown-width: 120px;
+}
+
 [v-cloak] {
 	display: none;
 }
@@ -52,7 +57,7 @@ button:focus {
 	height: 24px;
 }
 .character-selector.selected {
-	background-color: #c7f2ea;
+	background-color: var(--selected-color);
 }
 
 .chart-container {

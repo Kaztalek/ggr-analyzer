@@ -20,7 +20,7 @@
 	display: flex;
 	gap: 4px;
 	align-items: center;
-	min-width: 100px;
+	min-width: var(--dropdown-width);
 }
 .dropdown-selector:hover {
 	background-color: #ccc;
@@ -36,6 +36,7 @@
 	position: absolute;
 	top: 100%;
 	left: 0;
+	min-width: var(--dropdown-width);
 	margin: 4px 0;
 	background-color: #fff;
 	border: 1px solid #ccc;
@@ -55,5 +56,5 @@
 	background-color: #f0f0f0;
 }
 .dropdown-option.selected {
-	background-color: #c7f2ea;
+	background-color: var(--selected-color);
 }

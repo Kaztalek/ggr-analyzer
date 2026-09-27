@@ -16,6 +16,8 @@ type allReplayDataType = ggrReplayType & {
 	charCode: (typeof CHARACTERS)[number]['code'];
 	didWin: boolean;
 	oppCharCode: (typeof CHARACTERS)[number]['code'];
+	oppId: string;
+	oppName: string;
 };
 
 type charDistributionDataType = {
@@ -118,6 +120,7 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 		const oppId = isPlayer1 ? replay.p2SteamId : replay.p1SteamId;
 		const charCode = isPlayer1 ? replay.p1Char.code : replay.p2Char.code;
 		const oppCharCode = isPlayer1 ? replay.p2Char.code : replay.p1Char.code;
+		const oppName = isPlayer1 ? replay.p2Name : replay.p1Name;
 		const didWin =
 			(isPlayer1 && replay.winner === 'P1') ||
 			(!isPlayer1 && replay.winner === 'P2');
@@ -127,7 +130,9 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 				...replay,
 				charCode,
 				didWin,
-				oppCharCode
+				oppCharCode,
+				oppId,
+				oppName
 			});
 		}
 
@@ -148,7 +153,6 @@ export const generateReports = async (replays: ggrReplayType[]) => {
 					yourWins: 0
 				};
 			}
-			const oppName = isPlayer1 ? replay.p2Name : replay.p1Name;
 
 			oppData[oppId].names.add(oppName);
 			oppData[oppId].total += 1;

@@ -67,6 +67,19 @@ const datasets = [
 		}, {})
 	).sort((a, b) => b.data.length - a.data.length)
 ];
+const oppList = Object.values(
+	replayData.reduce((opponents, replay) => {
+		const opponent = (opponents[replay.oppId] ??= {
+			text: replay.oppName,
+			value: replay.oppId,
+			otherNames: new Set()
+		});
+
+		opponent.otherNames.add(replay.oppName);
+
+		return opponents;
+	}, {})
+).sort((a, b) => a.text.localeCompare(b.text));
 
 // Chart.js object
 let chart;
@@ -74,9 +87,13 @@ let chart;
 const app = createApp({
 	setup() {
 		const oppCharCode = ref('');
+		const oppId = ref('');
 		const chartFilters = ref([
 			// filter by opponent character
-			(replay) => !oppCharCode.value || replay.oppCharCode === oppCharCode.value
+			(replay) =>
+				!oppCharCode.value || replay.oppCharCode === oppCharCode.value,
+			// filter by opponent ID
+			(replay) => !oppId.value || replay.oppId === oppId.value
 		]);
 		const filteredDatasets = computed(() =>
 			datasets.map((dataset) => ({
@@ -117,6 +134,7 @@ const app = createApp({
 				value: CHARACTERS[key].code
 			}))
 		]);
+		const oppOptions = ref([{text: 'All', value: ''}, ...oppList]);
 
 		const updateChartTitle = () =>
 			(chart.options.plugins.title.text = `Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`);
@@ -161,6 +179,15 @@ const app = createApp({
 					);
 				}
 			});
+		};
+
+		// operations that keep the chart in sync with Vue data
+		const syncChart = () => {
+			updateChartTitle();
+			updateChartData();
+			chart.update();
+			syncChartVisibility();
+			resetZoom();
 		};
 
 		onMounted(() => {
@@ -348,23 +375,23 @@ const app = createApp({
 			watch(
 				gameDisplayCount,
 				(newValue) => {
-					updateChartTitle();
-					updateChartData();
+					// update chart X axis label
 					chart.options.scales.x.title.text = newValue
 						? `Last ${newValue} games`
 						: 'All games';
-					chart.update();
-					syncChartVisibility();
+					syncChart();
 				},
 				{immediate: true}
 			);
 
 			// filter by opponent character
 			watch(oppCharCode, () => {
-				updateChartTitle();
-				updateChartData();
-				chart.update();
-				syncChartVisibility();
+				syncChart();
+			});
+
+			// filter by opponent ID
+			watch(oppId, () => {
+				syncChart();
 			});
 
 			// toggle visibility of character
@@ -386,6 +413,8 @@ const app = createApp({
 			isSeeded: ref(!!replayData.length),
 			oppCharCode,
 			oppCharOptions,
+			oppId,
+			oppOptions,
 			resetZoom,
 			totalReplays
 		};

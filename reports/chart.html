@@ -65,6 +65,11 @@
 						label="Opponent Character"
 						:options="oppCharOptions">
 					</Dropdown>
+					<Dropdown
+						v-model="oppId"
+						label="Opponent"
+						:options="oppOptions">
+					</Dropdown>
 					<button
 						class="reset-zoom"
 						@click="resetZoom">
