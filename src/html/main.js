@@ -67,19 +67,17 @@ const datasets = [
 		}, {})
 	).sort((a, b) => b.data.length - a.data.length)
 ];
-const oppList = Object.values(
-	replayData.reduce((opponents, replay) => {
-		const opponent = (opponents[replay.oppId] ??= {
-			text: replay.oppName,
-			value: replay.oppId,
-			otherNames: new Set()
-		});
+const oppDict = replayData.reduce((opponents, replay) => {
+	const opponent = (opponents[replay.oppId] ??= {
+		text: replay.oppName,
+		value: replay.oppId,
+		otherNames: new Set()
+	});
 
-		opponent.otherNames.add(replay.oppName);
+	opponent.otherNames.add(replay.oppName);
 
-		return opponents;
-	}, {})
-).sort((a, b) => a.text.localeCompare(b.text));
+	return opponents;
+}, {});
 
 // Chart.js object
 let chart;
@@ -134,10 +132,24 @@ const app = createApp({
 				value: CHARACTERS[key].code
 			}))
 		]);
-		const oppOptions = ref([{text: 'All', value: ''}, ...oppList]);
+		const oppOptions = ref([
+			{text: 'All', value: ''},
+			...Object.values(oppDict).sort((a, b) => a.text.localeCompare(b.text))
+		]);
 
-		const updateChartTitle = () =>
-			(chart.options.plugins.title.text = `Win Rate${oppCharCode.value ? ` vs ${CHARACTERS[oppCharCode.value].name}` : ''}`);
+		const updateChartTitle = () => {
+			let title = 'Win Rate';
+			if (oppCharCode.value || oppId.value) {
+				const oppName = oppId.value ? oppDict[oppId.value].text : '';
+				const oppChar = oppCharCode.value
+					? CHARACTERS[oppCharCode.value].name
+					: '';
+				// use parentheses if both opponent ID and character are specified
+				const hasBothIdAndChar = oppId.value && oppCharCode.value;
+				title = `${title} vs ${oppName}${hasBothIdAndChar ? ' (' : ''}${oppChar}${hasBothIdAndChar ? ')' : ''}`;
+			}
+			chart.options.plugins.title.text = title;
+		};
 
 		// update datasets separately from filtering, so that slicing the last n games doesn't affect game totals
 		const updateChartData = () => {
