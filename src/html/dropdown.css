@@ -58,3 +58,8 @@
 .dropdown-option.selected {
 	background-color: var(--selected-color);
 }
+
+.search-container {
+	padding: 4px;
+	border-bottom: 1px solid #bbb;
+}

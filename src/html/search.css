@@ -1,0 +1,15 @@
+.search-wrapper {
+	position: relative;
+	display: flex;
+}
+
+.search {
+	flex-grow: 1;
+}
+
+.clear-button {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	transform: translateY(-50%);
+}

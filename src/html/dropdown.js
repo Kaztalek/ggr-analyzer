@@ -50,7 +50,7 @@ const Dropdown = {
 		};
 
 		const handleClickOutside = (e) => {
-			if (!dropdown.value?.contains(e.target)) {
+			if (isOpen.value && !dropdown.value?.contains(e.target)) {
 				isOpen.value = false;
 			}
 		};
@@ -100,7 +100,7 @@ const Dropdown = {
 		<div ref="dropdown" class="dropdown">
 			<button
 				role="combobox"
-				class="dropdown-selector"
+				class="primary-button dropdown-selector"
 				:class="{'has-image': !!selectedOption.image}"
 				@click="isOpen = !isOpen"
 				@keydown="handleKeydown">
@@ -112,7 +112,7 @@ const Dropdown = {
 				<span class="dropdown-caret">▼</span>
 			</button>
 			<div v-if="isOpen" role="listbox" class="dropdown-list">
-				<div v-if="searchField">
+				<div v-if="searchField" class="search-container">
 					<Search :items="options" :searchField="searchField" @search="filteredOptions = $event"></Search>
 				</div>
 				<div
