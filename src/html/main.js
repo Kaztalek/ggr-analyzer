@@ -71,10 +71,16 @@ const oppDict = replayData.reduce((opponents, replay) => {
 	const opponent = (opponents[replay.oppId] ??= {
 		text: replay.oppName,
 		value: replay.oppId,
-		otherNames: new Set()
+		names: new Set(),
+		searchKey: replay.oppId
 	});
 
-	opponent.otherNames.add(replay.oppName);
+	if (!opponent.names.has(replay.oppName)) {
+		// search this list by steam ID or any name
+		opponent.searchKey = `${opponent.searchKey}\n${replay.oppName}`;
+		// this line could be outside the if statement, but since it exists anyway, why not
+		opponent.names.add(replay.oppName);
+	}
 
 	return opponents;
 }, {});
@@ -433,6 +439,7 @@ const app = createApp({
 	}
 });
 
+app.component('Search', Search);
 app.component('Dropdown', Dropdown);
 
 app.mount('#app');

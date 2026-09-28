@@ -15,6 +15,12 @@ const Dropdown = {
 		placeholder: {
 			type: String,
 			default: ''
+		},
+		// what field to search by
+		// if passed, enables search
+		searchField: {
+			type: String,
+			default: ''
 		}
 	},
 	emits: ['update:modelValue'],
@@ -22,6 +28,7 @@ const Dropdown = {
 		const dropdown = ref(null);
 		const isOpen = ref(false);
 		const highlightedIndex = ref(0);
+		const filteredOptions = ref(props.options);
 
 		const selectedOption = computed(() =>
 			props.options.find((option) => option.value === props.modelValue)
@@ -79,6 +86,7 @@ const Dropdown = {
 
 		return {
 			dropdown,
+			filteredOptions,
 			handleKeydown,
 			highlightedIndex,
 			isOpen,
@@ -104,8 +112,11 @@ const Dropdown = {
 				<span class="dropdown-caret">▼</span>
 			</button>
 			<div v-if="isOpen" role="listbox" class="dropdown-list">
+				<div v-if="searchField">
+					<Search :items="options" :searchField="searchField" @search="filteredOptions = $event"></Search>
+				</div>
 				<div
-					v-for="(option, i) in options"
+					v-for="(option, i) in filteredOptions"
 					:key="option.value"
 					role="option"
 					class="dropdown-option"
