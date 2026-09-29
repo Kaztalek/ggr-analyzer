@@ -28,7 +28,7 @@ const Dropdown = {
 		const dropdown = ref(null);
 		const isOpen = ref(false);
 		const highlightedIndex = ref(0);
-		const filteredOptions = ref(props.options);
+		const filteredOptions = ref([]);
 
 		const selectedOption = computed(() =>
 			props.options.find((option) => option.value === props.modelValue)
@@ -84,6 +84,14 @@ const Dropdown = {
 			document.removeEventListener('click', handleClickOutside);
 		});
 
+		watch(
+			() => props.options,
+			(newValue) => {
+				filteredOptions.value = newValue;
+			},
+			{immediate: true}
+		);
+
 		return {
 			dropdown,
 			filteredOptions,
@@ -128,6 +136,9 @@ const Dropdown = {
 						:alt="option.text"
 					/>
 					{{option.text}}
+				</div>
+				<div v-if="!filteredOptions.length" class="dropdown-no-results">
+					No results
 				</div>
 			</div>
 		</div>

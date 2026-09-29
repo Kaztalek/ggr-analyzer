@@ -59,6 +59,13 @@
 	background-color: var(--selected-color);
 }
 
+.dropdown-no-results {
+	display: flex;
+	justify-content: center;
+	font-size: 13px;
+	padding: 8px;
+}
+
 .search-container {
 	padding: 4px;
 	border-bottom: 1px solid #bbb;
