@@ -64,15 +64,22 @@ const Dropdown = {
 					moveIndex(1);
 					break;
 				case 'Enter':
-					const option = props.options[highlightedIndex.value];
+					const option = filteredOptions.value[highlightedIndex.value];
 					if (option && isOpen.value) {
 						e.preventDefault();
 						selectOption(option);
+						dropdown.value.querySelector('.dropdown-selector')?.focus();
 					}
 					break;
 				case 'Escape':
 					isOpen.value = false;
 					break;
+			}
+		};
+
+		const handleSearchKeydown = (e) => {
+			if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+				e.preventDefault();
 			}
 		};
 
@@ -92,10 +99,21 @@ const Dropdown = {
 			{immediate: true}
 		);
 
+		// update highlighted item as the options list filters
+		// if the selected option exists, move to selected item
+		// otherwise, reset back to 0 (top of list)
+		watch(filteredOptions, () => {
+			const optionIndex = filteredOptions.value.findIndex(
+				(option) => option.value === props.modelValue
+			);
+			highlightedIndex.value = optionIndex === -1 ? 0 : optionIndex;
+		});
+
 		return {
 			dropdown,
 			filteredOptions,
 			handleKeydown,
+			handleSearchKeydown,
 			highlightedIndex,
 			isOpen,
 			selectedOption,
@@ -103,15 +121,14 @@ const Dropdown = {
 		};
 	},
 	template: `
-	<div>
+	<div @keydown="handleKeydown">
 		<span v-if="label" class="dropdown-label">{{label}}</span>
 		<div ref="dropdown" class="dropdown">
 			<button
 				role="combobox"
 				class="primary-button dropdown-selector"
 				:class="{'has-image': !!selectedOption.image}"
-				@click="isOpen = !isOpen"
-				@keydown="handleKeydown">
+				@click="isOpen = !isOpen">
 				<img
 					v-if="selectedOption.image"
 					:src="selectedOption.image"
@@ -121,7 +138,12 @@ const Dropdown = {
 			</button>
 			<div v-if="isOpen" role="listbox" class="dropdown-list">
 				<div v-if="searchField" class="search-container">
-					<Search :items="options" :searchField="searchField" @search="filteredOptions = $event"></Search>
+					<Search
+						:items="options"
+						:searchField="searchField"
+						@search="filteredOptions = $event"
+						@keydown="handleSearchKeydown">
+					</Search>
 				</div>
 				<div
 					v-for="(option, i) in filteredOptions"

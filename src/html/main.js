@@ -219,6 +219,10 @@ const app = createApp({
 							min: 1,
 							title: {
 								display: true
+							},
+							ticks: {
+								// only show integer steps
+								callback: (value) => (Number.isInteger(value) ? value : '')
 							}
 						},
 						// TODO have time-scaled x-axis option in the future
