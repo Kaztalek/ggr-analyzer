@@ -142,8 +142,13 @@ const app = createApp({
 			{text: 'All', value: ''},
 			...Object.values(oppDict).sort((a, b) => a.text.localeCompare(b.text))
 		]);
-
-		const updateChartTitle = () => {
+		const oppAkaList = computed(() => {
+			if (!oppId.value) {
+				return [];
+			}
+			return [...oppDict[oppId.value].names].slice(1);
+		});
+		const chartTitle = computed(() => {
 			let title = 'Win Rate';
 			if (oppCharCode.value || oppId.value) {
 				const oppName = oppId.value ? oppDict[oppId.value].text : '';
@@ -154,8 +159,8 @@ const app = createApp({
 				const hasBothIdAndChar = oppId.value && oppCharCode.value;
 				title = `${title} vs ${oppName}${hasBothIdAndChar ? ' (' : ''}${oppChar}${hasBothIdAndChar ? ')' : ''}`;
 			}
-			chart.options.plugins.title.text = title;
-		};
+			return title;
+		});
 
 		// update datasets separately from filtering, so that slicing the last n games doesn't affect game totals
 		const updateChartData = () => {
@@ -201,7 +206,6 @@ const app = createApp({
 
 		// operations that keep the chart in sync with Vue data
 		const syncChart = () => {
-			updateChartTitle();
 			updateChartData();
 			chart.update();
 			syncChartVisibility();
@@ -258,9 +262,6 @@ const app = createApp({
 					plugins: {
 						legend: {
 							display: false
-						},
-						title: {
-							display: true
 						},
 						tooltip: {
 							enabled: false,
@@ -430,9 +431,11 @@ const app = createApp({
 			ALL_CHAR_KEY: ref(ALL_CHAR_KEY),
 			characterData,
 			characterVisibility,
+			chartTitle,
 			gameDisplayCount,
 			gameDisplayOptions,
 			isSeeded: ref(!!replayData.length),
+			oppAkaList,
 			oppCharCode,
 			oppCharOptions,
 			oppId,

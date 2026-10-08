@@ -48,38 +48,50 @@
 					<br />
 					See README.md for instructions on setting up and generating reports.
 				</div>
-				<div
-					v-show="isSeeded"
-					class="chart-container">
-					<canvas
-						id="win-rate-chart"
-						class="chart"></canvas>
-				</div>
-				<div
-					v-show="isSeeded"
-					class="chart-controls">
-					<Dropdown
-						v-model="gameDisplayCount"
-						label="Game Count"
-						:options="gameDisplayOptions">
-					</Dropdown>
-					<Dropdown
-						v-model="oppId"
-						label="Opponent"
-						search-field="searchKey"
-						:options="oppOptions">
-					</Dropdown>
-					<Dropdown
-						v-model="oppCharCode"
-						label="Opponent Character"
-						:options="oppCharOptions">
-					</Dropdown>
-					<button
-						class="primary-button reset-zoom"
-						@click="resetZoom">
-						Reset Zoom
-					</button>
-				</div>
+				<template v-else>
+					<div class="chart-title">
+						{{chartTitle}}
+						<div
+							v-if="oppAkaList.length"
+							class="chart-subtitle">
+							AKA
+							<div
+								v-for="name in oppAkaList"
+								:key="name"
+								class="badge">
+								{{name}}
+							</div>
+						</div>
+					</div>
+					<div class="chart-container">
+						<canvas
+							id="win-rate-chart"
+							class="chart"></canvas>
+					</div>
+					<div class="chart-controls">
+						<Dropdown
+							v-model="gameDisplayCount"
+							label="Game Count"
+							:options="gameDisplayOptions">
+						</Dropdown>
+						<Dropdown
+							v-model="oppId"
+							label="Opponent"
+							search-field="searchKey"
+							:options="oppOptions">
+						</Dropdown>
+						<Dropdown
+							v-model="oppCharCode"
+							label="Opponent Character"
+							:options="oppCharOptions">
+						</Dropdown>
+						<button
+							class="primary-button reset-zoom"
+							@click="resetZoom">
+							Reset Zoom
+						</button>
+					</div>
+				</template>
 			</div>
 		</div>
 
