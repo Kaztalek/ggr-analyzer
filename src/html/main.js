@@ -90,6 +90,7 @@ let chart;
 
 const app = createApp({
 	setup() {
+		const isSeeded = ref(!!replayData.length);
 		const oppCharCode = ref('');
 		const oppId = ref('');
 		const chartFilters = ref([
@@ -213,6 +214,10 @@ const app = createApp({
 		};
 
 		onMounted(() => {
+			if (!isSeeded.value) {
+				return;
+			}
+
 			chart = new Chart(document.getElementById('win-rate-chart'), {
 				type: 'line',
 				options: {
@@ -434,7 +439,7 @@ const app = createApp({
 			chartTitle,
 			gameDisplayCount,
 			gameDisplayOptions,
-			isSeeded: ref(!!replayData.length),
+			isSeeded,
 			oppAkaList,
 			oppCharCode,
 			oppCharOptions,
