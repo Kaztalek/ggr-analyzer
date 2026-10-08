@@ -44,8 +44,18 @@ const Search = {
 	},
 	template: `
 	<div class="search-wrapper">
-		<input ref="search" type="text" v-model="query" class="search" />
-		<button v-if="query" class="clear-button" @click.stop="clear">✕</button>
+		<input
+			ref="search"
+			type="text"
+			v-model="query"
+			class="search" />
+		<button
+			v-if="query"
+			class="clear-button"
+			@click.stop="clear"
+			@keydown.stop>
+			✕
+		</button>
 	</div>
 	`
 };

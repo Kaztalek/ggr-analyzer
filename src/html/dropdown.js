@@ -44,7 +44,7 @@ const Dropdown = {
 
 		const moveIndex = (amount) => {
 			const newValue = highlightedIndex.value + amount;
-			if (newValue >= 0 && newValue < props.options.length) {
+			if (newValue >= 0 && newValue < filteredOptions.value.length) {
 				highlightedIndex.value = newValue;
 			}
 		};
@@ -122,8 +122,14 @@ const Dropdown = {
 	},
 	template: `
 	<div @keydown="handleKeydown">
-		<span v-if="label" class="dropdown-label">{{label}}</span>
-		<div ref="dropdown" class="dropdown">
+		<span
+			v-if="label"
+			class="dropdown-label"
+			>{{label}}</span
+		>
+		<div
+			ref="dropdown"
+			class="dropdown">
 			<button
 				role="combobox"
 				class="primary-button dropdown-selector"
@@ -131,19 +137,22 @@ const Dropdown = {
 				@click="isOpen = !isOpen">
 				<img
 					v-if="selectedOption.image"
-					:src="selectedOption.image"
-				/>
+					:src="selectedOption.image" />
 				<span>{{selectedOption?.text || placeholder}}</span>
 				<span class="dropdown-caret">▼</span>
 			</button>
-			<div v-if="isOpen" role="listbox" class="dropdown-list">
-				<div v-if="searchField" class="search-container">
-					<Search
+			<div
+				v-if="isOpen"
+				role="listbox"
+				class="dropdown-list">
+				<div
+					v-if="searchField"
+					class="search-container">
+					<search
 						:items="options"
 						:searchField="searchField"
 						@search="filteredOptions = $event"
-						@keydown="handleSearchKeydown">
-					</Search>
+						@keydown="handleSearchKeydown"></search>
 				</div>
 				<div
 					v-for="(option, i) in filteredOptions"
@@ -155,11 +164,12 @@ const Dropdown = {
 					<img
 						v-if="option.image"
 						:src="option.image"
-						:alt="option.text"
-					/>
+						:alt="option.text" />
 					{{option.text}}
 				</div>
-				<div v-if="!filteredOptions.length" class="dropdown-no-results">
+				<div
+					v-if="!filteredOptions.length"
+					class="dropdown-no-results">
 					No results
 				</div>
 			</div>
